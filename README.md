@@ -63,6 +63,10 @@ Rocket Sled/
 ├── README.md               # This file
 ├── LICENSE                 # MIT License
 ├── RocketSledder.pdf       # Student handout
+├── .nojekyll               # GitHub Pages configuration
+├── .github/
+│   └── workflows/
+│       └── deploy.yml      # GitHub Actions deployment
 └── src/
     ├── css/
     │   └── app.css         # Styling
@@ -71,6 +75,25 @@ Rocket Sled/
         ├── visualization.js # p5.js rendering
         └── main.js         # Application controller
 ```
+
+## 🚀 Deployment
+
+This site is automatically deployed to GitHub Pages via GitHub Actions.
+
+### Automatic Deployment
+
+- **Trigger**: Every push to the `main` branch
+- **Workflow**: `.github/workflows/deploy.yml`
+- **URL**: https://vladimirlopez.github.io/rocket-sled-simulation/
+
+### Manual Deployment
+
+You can manually trigger a deployment from the GitHub Actions tab by running the "Deploy to GitHub Pages" workflow.
+
+### Requirements
+
+- GitHub Pages must be enabled in repository settings
+- Pages source should be set to "GitHub Actions"
 
 ## 📄 License
 
