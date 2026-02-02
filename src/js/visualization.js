@@ -349,8 +349,15 @@ function drawSled(x, y, state) {
     ellipse(0, SLED_HEIGHT / 3, 22, 14);
 
     // Rocket jets on sides
-    drawRocket(-SLED_WIDTH / 2 - 10, SLED_HEIGHT / 2, -1, state.thrustDirection === -1);
-    drawRocket(SLED_WIDTH / 2 + 10, SLED_HEIGHT / 2, 1, state.thrustDirection === 1);
+    // Logic corrected for Newton's 3rd Law:
+    // To go LEFT (Force < 0), we need exhaust to go RIGHT. So Right rocket fires.
+    // To go RIGHT (Force > 0), we need exhaust to go LEFT. So Left rocket fires.
+
+    // Left Rocket (Points Left): Fires when thrust is Positive (Right)
+    drawRocket(-SLED_WIDTH / 2 - 10, SLED_HEIGHT / 2, -1, state.thrustDirection === 1);
+
+    // Right Rocket (Points Right): Fires when thrust is Negative (Left)
+    drawRocket(SLED_WIDTH / 2 + 10, SLED_HEIGHT / 2, 1, state.thrustDirection === -1);
 
     // Draw Character (Penguin!)
     drawPenguin(0, -5, state.thrustDirection);
