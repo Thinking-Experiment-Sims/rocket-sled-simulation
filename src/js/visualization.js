@@ -144,9 +144,15 @@ function drawParallaxBackground(velocity) {
     // Layer 2: Trees in background (medium parallax - 0.4x) - LARGER and BRIGHTER
     const treeOffset = bgOffset * 0.4;
     const treeSpacing = 150;
+    const centerX = canvasWidth / 2;
+    const clearZone = 180; // Clear zone around sled for force arrows visibility
 
     for (let i = -1; i <= Math.ceil(canvasWidth / treeSpacing) + 2; i++) {
         const treeX = (i * treeSpacing - (treeOffset % treeSpacing));
+
+        // Skip trees near the center (clear zone for force arrows)
+        if (Math.abs(treeX - centerX) < clearZone) continue;
+
         const treeHeight = 80 + (i % 3) * 20; // Taller trees
 
         // Tree trunk - brown
@@ -175,6 +181,9 @@ function drawParallaxBackground(velocity) {
 
     for (let i = -1; i <= Math.ceil(canvasWidth / poleSpacing) + 2; i++) {
         const poleX = (i * poleSpacing - (poleOffset % poleSpacing));
+
+        // Skip poles near the center (clear zone for force arrows)
+        if (Math.abs(poleX - centerX) < clearZone) continue;
 
         // Pole - gray with outline
         fill('#808080');
