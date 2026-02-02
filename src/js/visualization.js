@@ -245,62 +245,67 @@ function drawRocket(x, y, direction, active) {
 }
 
 /**
- * Draw force diagram centered on the sled
+ * Draw force diagram centered on the sled's center of mass
+ * All forces originate from the center of mass
+ * Uses notation: "F Type on Sled by Source"
  */
 function drawForceDiagram(x, y, state) {
-    const centerY = y + SLED_HEIGHT / 2;
-    const scale = 0.03; // Pixels per Newton
-    const minArrowLength = 20;
+    // Center of mass position (center of the sled body)
+    const comX = x;
+    const comY = y + SLED_HEIGHT / 2;
 
-    // Applied Force (horizontal)
+    const scale = 0.03; // Pixels per Newton
+    const minArrowLength = 25;
+
+    // Applied Force (horizontal) - from rockets
     if (state.appliedForce !== 0) {
         const length = Math.max(Math.abs(state.appliedForce) * scale, minArrowLength);
         drawForceArrow(
-            x, centerY,
+            comX, comY,
             state.appliedForce > 0 ? length : -length, 0,
             COLORS.forceApplied,
-            'Fapp'
+            'F push on Sled by Rockets'
         );
     }
 
-    // Friction Force (horizontal, opposes motion)
+    // Friction Force (horizontal, opposes motion) - from ground
     if (Math.abs(state.frictionForce) > 0.1) {
         const length = Math.max(Math.abs(state.frictionForce) * scale, minArrowLength);
         drawForceArrow(
-            x, centerY + 15,
+            comX, comY,
             state.frictionForce > 0 ? length : -length, 0,
             COLORS.forceFriction,
-            'Ffrict'
+            'F friction on Sled by Ground'
         );
     }
 
-    // Air Drag Force (horizontal, opposes motion)
+    // Air Drag Force (horizontal, opposes motion) - from air
     if (Math.abs(state.airDragForce) > 0.1) {
         const length = Math.max(Math.abs(state.airDragForce) * scale, minArrowLength);
         drawForceArrow(
-            x, centerY - 15,
+            comX, comY,
             state.airDragForce > 0 ? length : -length, 0,
             COLORS.forceAir,
-            'Fair'
+            'F drag on Sled by Air'
         );
     }
 
-    // Normal Force (upward)
+    // Normal Force (upward) - from ground
     const normalLength = Math.max(state.normalForce * scale * 0.5, minArrowLength);
     drawForceArrow(
-        x + 20, centerY,
+        comX, comY,
         0, -normalLength,
         COLORS.forceNormal,
-        'Fnorm'
+        'F normal on Sled by Ground'
     );
 
-    // Gravity/Weight (downward)
+    // Gravity/Weight (downward) - from Earth
     const gravityLength = Math.max(state.gravityForce * scale * 0.5, minArrowLength);
     drawForceArrow(
-        x - 20, centerY,
+        comX, comY,
         0, gravityLength,
         COLORS.forceGravity,
-        'Fgrav'
+        'F gravity on Sled by Earth'
     );
 }
 

@@ -5,7 +5,9 @@
 
 // Physical constants
 const SLED_MASS = 500; // kg
-const APPLIED_FORCE = 2000; // N (thrust from rockets)
+const MIN_FORCE = 500; // N
+const MAX_FORCE = 5000; // N
+let appliedForceMagnitude = 2000; // N (thrust from rockets, adjustable)
 const FRICTION_COEFFICIENT = 0.15;
 const AIR_DRAG_COEFFICIENT = 0.5;
 const GRAVITY = 9.8; // m/s²
@@ -75,6 +77,22 @@ function setAirDragEnabled(enabled) {
 }
 
 /**
+ * Set the applied force magnitude
+ * @param {number} force - Force in Newtons
+ */
+function setAppliedForceMagnitude(force) {
+    appliedForceMagnitude = Math.max(MIN_FORCE, Math.min(MAX_FORCE, force));
+}
+
+/**
+ * Get the applied force magnitude
+ * @returns {number} Force in Newtons
+ */
+function getAppliedForceMagnitude() {
+    return appliedForceMagnitude;
+}
+
+/**
  * Calculate all forces and update the physics state
  * @param {number} dt - Time step in seconds
  */
@@ -84,7 +102,7 @@ function updatePhysics(dt) {
     physicsState.normalForce = physicsState.gravityForce;
 
     // Calculate applied force (thrust)
-    physicsState.appliedForce = physicsState.thrustDirection * APPLIED_FORCE;
+    physicsState.appliedForce = physicsState.thrustDirection * appliedForceMagnitude;
 
     // Calculate friction force (opposes motion, only when moving)
     if (physicsState.frictionEnabled && Math.abs(physicsState.velocity) > 0.01) {

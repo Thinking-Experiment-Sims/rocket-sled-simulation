@@ -6,6 +6,7 @@
 // UI Elements
 let thrustLeftBtn, thrustOffBtn, thrustRightBtn;
 let frictionToggle, airDragToggle;
+let forceSlider, forceValueDisplay;
 let resetBtn;
 let speedDisplay, speedBarFill;
 let forceArrowsBtn, gridBtn;
@@ -44,6 +45,10 @@ function initializeUI() {
 
     // Control buttons
     resetBtn = document.getElementById('resetBtn');
+
+    // Force slider
+    forceSlider = document.getElementById('forceSlider');
+    forceValueDisplay = document.getElementById('forceValue');
 
     // Display elements
     speedDisplay = document.getElementById('speedDisplay');
@@ -93,6 +98,15 @@ function setupEventListeners() {
     gridBtn?.addEventListener('click', () => {
         gridBtn.classList.toggle('active');
         toggleGrid(gridBtn.classList.contains('active'));
+    });
+
+    // Force slider
+    forceSlider?.addEventListener('input', (e) => {
+        const force = parseInt(e.target.value, 10);
+        setAppliedForceMagnitude(force);
+        if (forceValueDisplay) {
+            forceValueDisplay.textContent = `${force} N`;
+        }
     });
 }
 

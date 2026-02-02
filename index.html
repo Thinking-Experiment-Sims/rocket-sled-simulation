@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rocket Sled - Newton's Laws Simulation</title>
-    <meta name="description" content="Interactive physics simulation demonstrating Newton's Laws with a rocket sled. Explore forces, friction, and air drag effects on motion.">
+    <meta name="description"
+        content="Interactive physics simulation demonstrating Newton's Laws with a rocket sled. Explore forces, friction, and air drag effects on motion.">
     <link rel="stylesheet" href="src/css/app.css">
 </head>
 
@@ -14,7 +15,8 @@
     <header class="app-header">
         <div class="header-left">
             <h1>🚀 Rocket Sled Simulation</h1>
-            <p class="author">By Vladimir Lopez | <a href="https://vladimirlopez.org" target="_blank" rel="noopener">vladimirlopez.org</a></p>
+            <p class="author">By Vladimir Lopez | <a href="https://vladimirlopez.org" target="_blank"
+                    rel="noopener">vladimirlopez.org</a></p>
         </div>
         <div class="header-right">
             <button id="helpBtn" class="header-btn">❓ Help</button>
@@ -54,6 +56,15 @@
                             <span class="icon">➡️</span>
                             <span>Right</span>
                         </button>
+                    </div>
+
+                    <!-- Force Magnitude Slider -->
+                    <div class="force-slider">
+                        <label for="forceSlider">
+                            <span>Force Magnitude</span>
+                            <span id="forceValue" class="value-display">2000 N</span>
+                        </label>
+                        <input type="range" id="forceSlider" min="500" max="5000" value="2000" step="100">
                     </div>
                 </div>
 
@@ -123,23 +134,23 @@
                     <div class="legend-items">
                         <div class="legend-item">
                             <div class="legend-color applied"></div>
-                            <span>F<sub>app</sub> - Applied Force</span>
+                            <span>F<sub>push</sub> on Sled by Rockets</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color normal"></div>
-                            <span>F<sub>norm</sub> - Normal Force</span>
+                            <span>F<sub>normal</sub> on Sled by Ground</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color gravity"></div>
-                            <span>F<sub>grav</sub> - Weight</span>
+                            <span>F<sub>gravity</sub> on Sled by Earth</span>
                         </div>
                         <div id="legendFriction" class="legend-item inactive">
                             <div class="legend-color friction"></div>
-                            <span>F<sub>frict</sub> - Friction</span>
+                            <span>F<sub>friction</sub> on Sled by Ground</span>
                         </div>
                         <div id="legendAir" class="legend-item inactive">
                             <div class="legend-color air"></div>
-                            <span>F<sub>air</sub> - Air Drag</span>
+                            <span>F<sub>drag</sub> on Sled by Air</span>
                         </div>
                     </div>
                 </div>
