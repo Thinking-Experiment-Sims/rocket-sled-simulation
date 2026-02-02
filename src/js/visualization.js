@@ -469,27 +469,32 @@ function drawForceDiagram(x, y, state) {
 function drawForceArrow(x, y, dx, dy, color, label) {
     push();
 
-    stroke(color);
-    strokeWeight(3);
-    fill(color);
-
-    // Arrow line
+    // Draw white outline first for visibility
+    stroke(255);
+    strokeWeight(8);
     line(x, y, x + dx, y + dy);
 
-    // Arrowhead
+    // Arrow line with thicker stroke
+    stroke(color);
+    strokeWeight(6);
+    fill(color);
+    line(x, y, x + dx, y + dy);
+
+    // Larger arrowhead
     const angle = atan2(dy, dx);
-    const arrowSize = 10;
+    const arrowSize = 16;
 
     push();
     translate(x + dx, y + dy);
     rotate(angle);
+    noStroke();
+    fill(color);
     triangle(0, 0, -arrowSize, -arrowSize / 2, -arrowSize, arrowSize / 2);
     pop();
 
-    // Label
+    // Label with larger text and outline
     noStroke();
-    fill(color);
-    textSize(12);
+    textSize(14);
     textAlign(CENTER);
     textStyle(BOLD);
 
@@ -498,12 +503,16 @@ function drawForceArrow(x, y, dx, dy, color, label) {
     let labelY = y + dy;
 
     if (dx !== 0) {
-        labelX += (dx > 0 ? 25 : -25);
+        labelX += (dx > 0 ? 30 : -30);
     }
     if (dy !== 0) {
-        labelY += (dy > 0 ? 18 : -10);
+        labelY += (dy > 0 ? 22 : -12);
     }
 
+    // Draw text outline for visibility
+    fill(0, 0, 0, 180);
+    text(label, labelX + 1, labelY + 1);
+    fill(color);
     text(label, labelX, labelY);
 
     pop();

@@ -42,25 +42,12 @@
 
                 <!-- Force Controls -->
                 <div class="force-controls">
-                    <h3>🔥 Applied Force</h3>
-
-                    <!-- Direction + Intensity Slider (single control) -->
-                    <div class="direction-slider">
-                        <div class="slider-labels">
-                            <span>← Left</span>
-                            <span>Off</span>
-                            <span>Right →</span>
-                        </div>
-                        <input type="range" id="directionSlider" min="-100" max="100" value="0" step="1">
-                        <div class="slider-value">
-                            <span id="forceValue">0 N</span>
-                        </div>
-                    </div>
+                    <h3>🔥 Max Force</h3>
 
                     <!-- Force Magnitude (max force) Slider -->
                     <div class="force-slider">
                         <label for="maxForceSlider">
-                            <span>Max Force</span>
+                            <span>Maximum Thrust</span>
                             <span id="maxForceValue" class="value-display">2000 N</span>
                         </label>
                         <input type="range" id="maxForceSlider" min="500" max="5000" value="2000" step="100">
@@ -112,6 +99,22 @@
                 </div>
 
                 <div id="canvasContainer"></div>
+
+                <!-- Direction Slider (below the sled) -->
+                <div class="direction-control">
+                    <div class="direction-slider-container">
+                        <div class="slider-labels">
+                            <span>← Left</span>
+                            <span>OFF</span>
+                            <span>Right →</span>
+                        </div>
+                        <input type="range" id="directionSlider" min="-100" max="100" value="0" step="1">
+                        <div class="slider-value">
+                            <span>Applied Force: </span>
+                            <span id="forceValue" class="force-number">0 N</span>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- RIGHT PANEL: Data Display -->

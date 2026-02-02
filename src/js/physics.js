@@ -81,7 +81,12 @@ function setAirDragEnabled(enabled) {
  * @param {number} force - Force in Newtons
  */
 function setAppliedForceMagnitude(force) {
-    appliedForceMagnitude = Math.max(MIN_FORCE, Math.min(MAX_FORCE, force));
+    // Allow 0 force (thrust off), otherwise clamp to valid range
+    if (force === 0) {
+        appliedForceMagnitude = 0;
+    } else {
+        appliedForceMagnitude = Math.max(MIN_FORCE, Math.min(MAX_FORCE, Math.abs(force)));
+    }
 }
 
 /**
