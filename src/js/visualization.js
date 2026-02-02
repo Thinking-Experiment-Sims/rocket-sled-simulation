@@ -408,8 +408,9 @@ function drawForceDiagram(x, y, state) {
     const comX = x;
     const comY = y + SLED_HEIGHT / 2;
 
-    const scale = 0.03; // Pixels per Newton
-    const minArrowLength = 25;
+    // INCREASED scale for larger arrows
+    const scale = 0.08; // Pixels per Newton - MUCH LARGER
+    const minArrowLength = 60; // Minimum visible arrow length
 
     // Applied Force (horizontal) - from rockets
     if (state.appliedForce !== 0) {
@@ -469,20 +470,20 @@ function drawForceDiagram(x, y, state) {
 function drawForceArrow(x, y, dx, dy, color, label) {
     push();
 
-    // Draw white outline first for visibility
-    stroke(255);
-    strokeWeight(8);
+    // Draw BLACK outline first for visibility
+    stroke(0);
+    strokeWeight(16);
     line(x, y, x + dx, y + dy);
 
-    // Arrow line with thicker stroke
+    // Arrow line - VERY THICK
     stroke(color);
-    strokeWeight(6);
+    strokeWeight(12);
     fill(color);
     line(x, y, x + dx, y + dy);
 
-    // Larger arrowhead
+    // LARGE arrowhead
     const angle = atan2(dy, dx);
-    const arrowSize = 16;
+    const arrowSize = 25;
 
     push();
     translate(x + dx, y + dy);
@@ -492,9 +493,9 @@ function drawForceArrow(x, y, dx, dy, color, label) {
     triangle(0, 0, -arrowSize, -arrowSize / 2, -arrowSize, arrowSize / 2);
     pop();
 
-    // Label with larger text and outline
+    // Label with LARGE text
     noStroke();
-    textSize(14);
+    textSize(16);
     textAlign(CENTER);
     textStyle(BOLD);
 
@@ -503,15 +504,19 @@ function drawForceArrow(x, y, dx, dy, color, label) {
     let labelY = y + dy;
 
     if (dx !== 0) {
-        labelX += (dx > 0 ? 30 : -30);
+        labelX += (dx > 0 ? 50 : -50);
     }
     if (dy !== 0) {
-        labelY += (dy > 0 ? 22 : -12);
+        labelY += (dy > 0 ? 30 : -15);
     }
 
-    // Draw text outline for visibility
-    fill(0, 0, 0, 180);
-    text(label, labelX + 1, labelY + 1);
+    // Draw text with black outline for visibility
+    fill(0);
+    for (let ox = -2; ox <= 2; ox++) {
+        for (let oy = -2; oy <= 2; oy++) {
+            text(label, labelX + ox, labelY + oy);
+        }
+    }
     fill(color);
     text(label, labelX, labelY);
 
