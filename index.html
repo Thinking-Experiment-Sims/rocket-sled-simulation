@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocket Sled - Newton's Laws Simulation</title>
+    <meta name="description" content="Interactive physics simulation demonstrating Newton's Laws with a rocket sled. Explore forces, friction, and air drag effects on motion.">
+    <link rel="stylesheet" href="src/css/app.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-left">
+            <h1>🚀 Rocket Sled Simulation</h1>
+            <p class="author">By Vladimir Lopez | <a href="https://vladimirlopez.org" target="_blank" rel="noopener">vladimirlopez.org</a></p>
+        </div>
+        <div class="header-right">
+            <button id="helpBtn" class="header-btn">❓ Help</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <main>
+            <!-- LEFT PANEL: Controls -->
+            <aside class="controls-section">
+                <h2>⚙️ Controls</h2>
+
+                <!-- Instructions -->
+                <div class="instructions">
+                    <h3>📖 How to Use:</h3>
+                    <ol>
+                        <li>Use <strong>thrust buttons</strong> to apply force</li>
+                        <li>Toggle <strong>Friction</strong> and <strong>Air Drag</strong></li>
+                        <li>Observe the <strong>force diagram</strong> on the sled</li>
+                        <li>Watch the <strong>speedometer</strong> respond</li>
+                    </ol>
+                </div>
+
+                <!-- Force Controls -->
+                <div class="force-controls">
+                    <h3>🔥 Applied Force</h3>
+                    <div class="thrust-buttons">
+                        <button id="thrustLeft" class="thrust-btn" title="Apply leftward force (← or A)">
+                            <span class="icon">⬅️</span>
+                            <span>Left</span>
+                        </button>
+                        <button id="thrustOff" class="thrust-btn off active" title="Turn off thrust (Space)">
+                            <span class="icon">⏹️</span>
+                            <span>Off</span>
+                        </button>
+                        <button id="thrustRight" class="thrust-btn" title="Apply rightward force (→ or D)">
+                            <span class="icon">➡️</span>
+                            <span>Right</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resistance Toggles -->
+                <div class="toggles-section">
+                    <h3>🛑 Resistance Forces</h3>
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <label for="frictionToggle">
+                                <span class="icon">🔩</span>
+                                <span>Friction</span>
+                            </label>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="frictionToggle">
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </div>
+                        <div class="toggle-item">
+                            <label for="airDragToggle">
+                                <span class="icon">💨</span>
+                                <span>Air Drag</span>
+                            </label>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="airDragToggle">
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Buttons -->
+                <div class="control-buttons">
+                    <button id="resetBtn" class="btn-secondary">
+                        <span>🔄</span> Reset
+                    </button>
+                </div>
+            </aside>
+
+            <!-- CENTER PANEL: Visualization -->
+            <section class="visualization-section">
+                <h2>📊 Simulation</h2>
+
+                <div class="viz-controls">
+                    <button id="forceArrowsBtn" class="viz-btn active">📊 Force Arrows</button>
+                    <button id="gridBtn" class="viz-btn active">📐 Grid</button>
+                </div>
+
+                <div id="canvasContainer"></div>
+            </section>
+
+            <!-- RIGHT PANEL: Data Display -->
+            <aside class="data-section">
+                <h2>📈 Data</h2>
+
+                <!-- Speedometer -->
+                <div class="speedometer">
+                    <h3>⚡ Velocity</h3>
+                    <div id="speedDisplay" class="speed-display">0.0<span class="unit">m/s</span></div>
+                    <div class="speed-bar">
+                        <div id="speedBarFill" class="speed-bar-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Force Legend -->
+                <div class="force-legend">
+                    <h3>Force Legend</h3>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color applied"></div>
+                            <span>F<sub>app</sub> - Applied Force</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color normal"></div>
+                            <span>F<sub>norm</sub> - Normal Force</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color gravity"></div>
+                            <span>F<sub>grav</sub> - Weight</span>
+                        </div>
+                        <div id="legendFriction" class="legend-item inactive">
+                            <div class="legend-color friction"></div>
+                            <span>F<sub>frict</sub> - Friction</span>
+                        </div>
+                        <div id="legendAir" class="legend-item inactive">
+                            <div class="legend-color air"></div>
+                            <span>F<sub>air</sub> - Air Drag</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Physics Tips -->
+                <div class="tips-section">
+                    <h3>💡 Physics Tips</h3>
+                    <ul>
+                        <li>With no friction: object in motion stays in motion!</li>
+                        <li>Friction and air drag always oppose motion</li>
+                        <li>Reversing thrust doesn't instantly reverse velocity</li>
+                        <li>Try: Get to red zone, reverse thrust, watch inertia!</li>
+                    </ul>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>© 2025 Vladimir Lopez. Licensed under the MIT License.
+            <a href="https://github.com/vladimirlopez" target="_blank" rel="noopener">View on GitHub</a>
+        </p>
+    </footer>
+
+    <!-- p5.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+
+    <!-- Physics Engine -->
+    <script src="src/js/physics.js"></script>
+
+    <!-- Visualization (p5.js sketch) -->
+    <script src="src/js/visualization.js"></script>
+
+    <!-- Main Application Controller -->
+    <script src="src/js/main.js"></script>
+</body>
+
+</html>
