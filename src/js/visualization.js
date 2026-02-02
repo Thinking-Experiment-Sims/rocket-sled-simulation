@@ -17,6 +17,9 @@ let showGrid = true;
 // Jet animation
 let jetFlameOffset = 0;
 
+// Parallax background scrolling
+let bgOffset = 0; // Tracks cumulative background position
+
 // Color palette (matches CSS variables)
 const COLORS = {
     primary: '#00BCD4',
@@ -70,6 +73,12 @@ function draw() {
     // Get current physics state
     const state = getPhysicsState();
 
+    // Update background offset based on velocity (parallax scrolling)
+    bgOffset += state.velocity * 2; // Scale for visual effect
+
+    // Draw parallax background layers
+    drawParallaxBackground(state.velocity);
+
     // Draw grid if enabled
     if (showGrid) {
         drawGrid();
@@ -102,6 +111,79 @@ function draw() {
 
     // Update jet animation
     jetFlameOffset = (jetFlameOffset + 0.3) % (Math.PI * 2);
+}
+
+/**
+ * Draw parallax scrolling background to simulate motion
+ * Three layers scroll at different speeds for depth effect
+ */
+function drawParallaxBackground(velocity) {
+    const trackY = canvasHeight * TRACK_Y_RATIO;
+    const skyHeight = trackY;
+
+    // Sky gradient
+    for (let y = 0; y < skyHeight; y++) {
+        const inter = map(y, 0, skyHeight, 0, 1);
+        const c = lerpColor(color('#1a1a2e'), color('#16213e'), inter);
+        stroke(c);
+        line(0, y, canvasWidth, y);
+    }
+
+    // Layer 1: Distant mountains (slowest parallax - 0.1x)
+    const mountainOffset = bgOffset * 0.1;
+    fill('#2d3a4a');
+    noStroke();
+
+    for (let i = -1; i <= Math.ceil(canvasWidth / 200) + 1; i++) {
+        const baseX = (i * 200 - (mountainOffset % 200));
+        beginShape();
+        vertex(baseX - 50, skyHeight);
+        vertex(baseX + 30, skyHeight - 80);
+        vertex(baseX + 60, skyHeight - 120);
+        vertex(baseX + 100, skyHeight - 90);
+        vertex(baseX + 150, skyHeight - 140);
+        vertex(baseX + 200, skyHeight - 70);
+        vertex(baseX + 250, skyHeight);
+        endShape(CLOSE);
+    }
+
+    // Layer 2: Middle hills (medium parallax - 0.3x)
+    const hillOffset = bgOffset * 0.3;
+    fill('#3d4a5a');
+
+    for (let i = -1; i <= Math.ceil(canvasWidth / 150) + 1; i++) {
+        const baseX = (i * 150 - (hillOffset % 150));
+        beginShape();
+        vertex(baseX, skyHeight);
+        vertex(baseX + 40, skyHeight - 40);
+        vertex(baseX + 75, skyHeight - 60);
+        vertex(baseX + 110, skyHeight - 35);
+        vertex(baseX + 150, skyHeight);
+        endShape(CLOSE);
+    }
+
+    // Layer 3: Ground/track stripes (fastest parallax - 1x)
+    const stripeOffset = bgOffset * 1.0;
+    const stripeWidth = 80;
+    const stripeSpacing = 160;
+
+    // Ground area below track
+    fill('#2a2a35');
+    rect(0, trackY + 8, canvasWidth, canvasHeight - trackY - 8);
+
+    // Moving stripes on ground
+    fill('#3a3a45');
+    for (let i = -1; i <= Math.ceil(canvasWidth / stripeSpacing) + 2; i++) {
+        const stripeX = (i * stripeSpacing - (stripeOffset % stripeSpacing));
+        rect(stripeX, trackY + 12, stripeWidth, 6, 2);
+    }
+
+    // Additional ground details - small markers
+    fill('#4a4a55');
+    for (let i = -1; i <= Math.ceil(canvasWidth / 40) + 2; i++) {
+        const markerX = (i * 40 - (stripeOffset % 40));
+        rect(markerX, trackY + 20, 4, 4);
+    }
 }
 
 /**
