@@ -4,16 +4,24 @@
  */
 
 // UI Elements
-let thrustLeftBtn, thrustOffBtn, thrustRightBtn;
+let directionSlider, forceValueDisplay;
+let maxForceSlider, maxForceValueDisplay;
 let frictionToggle, airDragToggle;
-let forceSlider, forceValueDisplay;
 let resetBtn;
-let speedDisplay, speedBarFill;
 let forceArrowsBtn, gridBtn;
+
+// Force value displays
+let appliedForceValueEl, frictionForceValueEl, airDragForceValueEl, netForceValueEl;
+
+// Velocimeter elements
+let velocimeterNeedle, velocityDisplay;
 
 // Animation state
 let isRunning = true;
 let lastTime = 0;
+
+// Current max force setting
+let maxForce = 2000;
 
 /**
  * Initialize the application when DOM is ready
@@ -34,10 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
  * Initialize UI element references
  */
 function initializeUI() {
-    // Thrust buttons
-    thrustLeftBtn = document.getElementById('thrustLeft');
-    thrustOffBtn = document.getElementById('thrustOff');
-    thrustRightBtn = document.getElementById('thrustRight');
+    // Direction slider (combines direction and intensity)
+    directionSlider = document.getElementById('directionSlider');
+    forceValueDisplay = document.getElementById('forceValue');
+
+    // Max force slider
+    maxForceSlider = document.getElementById('maxForceSlider');
+    maxForceValueDisplay = document.getElementById('maxForceValue');
 
     // Toggles
     frictionToggle = document.getElementById('frictionToggle');
@@ -46,13 +57,15 @@ function initializeUI() {
     // Control buttons
     resetBtn = document.getElementById('resetBtn');
 
-    // Force slider
-    forceSlider = document.getElementById('forceSlider');
-    forceValueDisplay = document.getElementById('forceValue');
+    // Force value displays
+    appliedForceValueEl = document.getElementById('appliedForceValue');
+    frictionForceValueEl = document.getElementById('frictionForceValue');
+    airDragForceValueEl = document.getElementById('airDragForceValue');
+    netForceValueEl = document.getElementById('netForceValue');
 
-    // Display elements
-    speedDisplay = document.getElementById('speedDisplay');
-    speedBarFill = document.getElementById('speedBarFill');
+    // Velocimeter
+    velocimeterNeedle = document.getElementById('velocimeterNeedle');
+    velocityDisplay = document.getElementById('velocityDisplay');
 
     // Visualization buttons
     forceArrowsBtn = document.getElementById('forceArrowsBtn');
@@ -66,10 +79,23 @@ function initializeUI() {
  * Set up event listeners for all controls
  */
 function setupEventListeners() {
-    // Thrust buttons
-    thrustLeftBtn?.addEventListener('click', () => setThrust(-1));
-    thrustOffBtn?.addEventListener('click', () => setThrust(0));
-    thrustRightBtn?.addEventListener('click', () => setThrust(1));
+    // Direction slider (controls both direction and intensity)
+    directionSlider?.addEventListener('input', (e) => {
+        const value = parseInt(e.target.value, 10);
+        updateForceFromSlider(value);
+    });
+
+    // Max force slider
+    maxForceSlider?.addEventListener('input', (e) => {
+        maxForce = parseInt(e.target.value, 10);
+        if (maxForceValueDisplay) {
+            maxForceValueDisplay.textContent = `${maxForce} N`;
+        }
+        // Update applied force with new max
+        if (directionSlider) {
+            updateForceFromSlider(parseInt(directionSlider.value, 10));
+        }
+    });
 
     // Keyboard controls
     document.addEventListener('keydown', handleKeyDown);
@@ -99,34 +125,61 @@ function setupEventListeners() {
         gridBtn.classList.toggle('active');
         toggleGrid(gridBtn.classList.contains('active'));
     });
+}
 
-    // Force slider
-    forceSlider?.addEventListener('input', (e) => {
-        const force = parseInt(e.target.value, 10);
-        setAppliedForceMagnitude(force);
-        if (forceValueDisplay) {
-            forceValueDisplay.textContent = `${force} N`;
-        }
-    });
+/**
+ * Update force from direction slider value (-100 to 100)
+ */
+function updateForceFromSlider(sliderValue) {
+    // Calculate actual force: percentage of max force * direction
+    const percentage = sliderValue / 100;
+    const actualForce = Math.round(percentage * maxForce);
+
+    // Update physics engine
+    if (sliderValue > 0) {
+        setThrustDirection(1);
+        setAppliedForceMagnitude(Math.abs(actualForce));
+    } else if (sliderValue < 0) {
+        setThrustDirection(-1);
+        setAppliedForceMagnitude(Math.abs(actualForce));
+    } else {
+        setThrustDirection(0);
+        setAppliedForceMagnitude(0);
+    }
+
+    // Update display
+    if (forceValueDisplay) {
+        forceValueDisplay.textContent = `${actualForce} N`;
+    }
 }
 
 /**
  * Handle keyboard controls
  */
 function handleKeyDown(e) {
+    if (!directionSlider) return;
+
+    const step = 10;
+    let currentValue = parseInt(directionSlider.value, 10);
+
     switch (e.key) {
         case 'ArrowLeft':
         case 'a':
         case 'A':
-            setThrust(-1);
+            currentValue = Math.max(-100, currentValue - step);
+            directionSlider.value = currentValue;
+            updateForceFromSlider(currentValue);
             break;
         case 'ArrowRight':
         case 'd':
         case 'D':
-            setThrust(1);
+            currentValue = Math.min(100, currentValue + step);
+            directionSlider.value = currentValue;
+            updateForceFromSlider(currentValue);
             break;
         case ' ':
-            setThrust(0);
+            directionSlider.value = 0;
+            updateForceFromSlider(0);
             e.preventDefault();
             break;
         case 'r':
@@ -137,36 +190,7 @@ function handleKeyDown(e) {
 }
 
 function handleKeyUp(e) {
-    // Optional: Stop thrust when key is released
-    // Uncomment if you want tap-to-thrust behavior
-    // if (['ArrowLeft', 'ArrowRight', 'a', 'd', 'A', 'D'].includes(e.key)) {
-    //     setThrust(0);
-    // }
-}
-
-/**
- * Set thrust direction and update UI
- */
-function setThrust(direction) {
-    setThrustDirection(direction);
-    updateThrustButtons(direction);
-}
-
-/**
- * Update thrust button active states
- */
-function updateThrustButtons(direction) {
-    thrustLeftBtn?.classList.remove('active');
-    thrustOffBtn?.classList.remove('active');
-    thrustRightBtn?.classList.remove('active');
-
-    if (direction < 0) {
-        thrustLeftBtn?.classList.add('active');
-    } else if (direction > 0) {
-        thrustRightBtn?.classList.add('active');
-    } else {
-        thrustOffBtn?.classList.add('active');
-    }
+    // No action needed for key up
 }
 
 /**
@@ -174,8 +198,11 @@ function updateThrustButtons(direction) {
  */
 function handleReset() {
     resetPhysics();
-    setThrust(0);
-    updateSpeedDisplay();
+    if (directionSlider) {
+        directionSlider.value = 0;
+    }
+    updateForceFromSlider(0);
+    updateDisplays();
 }
 
 /**
@@ -195,35 +222,45 @@ function physicsLoop(currentTime) {
     updatePhysics(dt);
 
     // Update UI displays
-    updateSpeedDisplay();
+    updateDisplays();
 
     // Continue loop
     requestAnimationFrame(physicsLoop);
 }
 
 /**
- * Update the speedometer display
+ * Update all display elements
  */
-function updateSpeedDisplay() {
+function updateDisplays() {
     const state = getPhysicsState();
-    const speed = Math.abs(state.velocity);
 
-    // Update numeric display
-    if (speedDisplay) {
-        speedDisplay.innerHTML = `${speed.toFixed(1)}<span class="unit">m/s</span>`;
+    // Update force values
+    if (appliedForceValueEl) {
+        appliedForceValueEl.textContent = `${state.appliedForce.toFixed(0)} N`;
+    }
+    if (frictionForceValueEl) {
+        frictionForceValueEl.textContent = `${state.frictionForce.toFixed(0)} N`;
+    }
+    if (airDragForceValueEl) {
+        airDragForceValueEl.textContent = `${state.airDragForce.toFixed(0)} N`;
+    }
+    if (netForceValueEl) {
+        netForceValueEl.textContent = `${state.netForce.toFixed(0)} N`;
     }
 
-    // Update bar
-    const percentage = getSpeedPercentage();
-    if (speedBarFill) {
-        speedBarFill.style.width = `${percentage}%`;
+    // Update velocimeter
+    const velocity = state.velocity;
+    const maxVelocity = 50;
 
-        // Red zone styling
-        if (isInRedZone()) {
-            speedBarFill.classList.add('red-zone');
-        } else {
-            speedBarFill.classList.remove('red-zone');
-        }
+    if (velocityDisplay) {
+        velocityDisplay.innerHTML = `${velocity.toFixed(1)} <span class="unit">m/s</span>`;
+    }
+
+    if (velocimeterNeedle) {
+        // Needle rotation: -90deg (left max) to +90deg (right max)
+        const rotation = (velocity / maxVelocity) * 90;
+        const clampedRotation = Math.max(-90, Math.min(90, rotation));
+        velocimeterNeedle.style.transform = `translateX(-50%) rotate(${clampedRotation}deg)`;
     }
 }
 

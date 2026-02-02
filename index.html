@@ -43,28 +43,27 @@
                 <!-- Force Controls -->
                 <div class="force-controls">
                     <h3>🔥 Applied Force</h3>
-                    <div class="thrust-buttons">
-                        <button id="thrustLeft" class="thrust-btn" title="Apply leftward force (← or A)">
-                            <span class="icon">⬅️</span>
-                            <span>Left</span>
-                        </button>
-                        <button id="thrustOff" class="thrust-btn off active" title="Turn off thrust (Space)">
-                            <span class="icon">⏹️</span>
+
+                    <!-- Direction + Intensity Slider (single control) -->
+                    <div class="direction-slider">
+                        <div class="slider-labels">
+                            <span>← Left</span>
                             <span>Off</span>
-                        </button>
-                        <button id="thrustRight" class="thrust-btn" title="Apply rightward force (→ or D)">
-                            <span class="icon">➡️</span>
-                            <span>Right</span>
-                        </button>
+                            <span>Right →</span>
+                        </div>
+                        <input type="range" id="directionSlider" min="-100" max="100" value="0" step="1">
+                        <div class="slider-value">
+                            <span id="forceValue">0 N</span>
+                        </div>
                     </div>
 
-                    <!-- Force Magnitude Slider -->
+                    <!-- Force Magnitude (max force) Slider -->
                     <div class="force-slider">
-                        <label for="forceSlider">
-                            <span>Force Magnitude</span>
-                            <span id="forceValue" class="value-display">2000 N</span>
+                        <label for="maxForceSlider">
+                            <span>Max Force</span>
+                            <span id="maxForceValue" class="value-display">2000 N</span>
                         </label>
-                        <input type="range" id="forceSlider" min="500" max="5000" value="2000" step="100">
+                        <input type="range" id="maxForceSlider" min="500" max="5000" value="2000" step="100">
                     </div>
                 </div>
 
@@ -119,13 +118,39 @@
             <aside class="data-section">
                 <h2>📈 Data</h2>
 
-                <!-- Speedometer -->
-                <div class="speedometer">
-                    <h3>⚡ Velocity</h3>
-                    <div id="speedDisplay" class="speed-display">0.0<span class="unit">m/s</span></div>
-                    <div class="speed-bar">
-                        <div id="speedBarFill" class="speed-bar-fill"></div>
+                <!-- Force Values Display -->
+                <div class="force-values">
+                    <h3>Force Values</h3>
+                    <div class="force-value-item applied">
+                        <span class="force-label">Applied Force:</span>
+                        <span id="appliedForceValue" class="force-number">0 N</span>
                     </div>
+                    <div class="force-value-item friction">
+                        <span class="force-label">Friction Force:</span>
+                        <span id="frictionForceValue" class="force-number">0 N</span>
+                    </div>
+                    <div class="force-value-item air">
+                        <span class="force-label">Air Drag Force:</span>
+                        <span id="airDragForceValue" class="force-number">0 N</span>
+                    </div>
+                    <div class="force-value-item net">
+                        <span class="force-label">Net Force:</span>
+                        <span id="netForceValue" class="force-number bold">0 N</span>
+                    </div>
+                </div>
+
+                <!-- Velocimeter -->
+                <div class="velocimeter">
+                    <h3>⚡ Velocimeter</h3>
+                    <div class="velocimeter-gauge">
+                        <div id="velocimeterNeedle" class="needle"></div>
+                        <div class="gauge-labels">
+                            <span class="left">-50</span>
+                            <span class="center">0</span>
+                            <span class="right">50</span>
+                        </div>
+                    </div>
+                    <div id="velocityDisplay" class="velocity-value">0.0 <span class="unit">m/s</span></div>
                 </div>
 
                 <!-- Force Legend -->

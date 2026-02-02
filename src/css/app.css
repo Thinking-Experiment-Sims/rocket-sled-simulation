@@ -230,6 +230,63 @@ main {
     font-size: 1.5rem;
 }
 
+/* Direction Slider (direction + intensity) */
+.direction-slider {
+    background: var(--bg-light);
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+}
+
+.direction-slider .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.direction-slider input[type="range"] {
+    width: 100%;
+    height: 12px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(to right, var(--force-applied) 0%, var(--bg-dark) 45%, var(--bg-dark) 55%, var(--force-applied) 100%);
+    border-radius: 6px;
+    outline: none;
+}
+
+.direction-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.direction-slider input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid white;
+}
+
+.direction-slider .slider-value {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--force-applied);
+    font-family: 'Courier New', monospace;
+}
+
 /* Force Slider */
 .force-slider {
     margin-top: 16px;
@@ -522,8 +579,73 @@ canvas {
     gap: 8px;
 }
 
-/* Speedometer */
-.speedometer {
+/* Force Values Display */
+.force-values {
+    background: var(--bg-light);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+}
+
+.force-values h3 {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.force-value-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.force-value-item:last-child {
+    border-bottom: none;
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 2px solid var(--border);
+}
+
+.force-value-item .force-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.force-value-item.applied .force-label {
+    color: var(--force-applied);
+}
+
+.force-value-item.friction .force-label {
+    color: var(--force-friction);
+}
+
+.force-value-item.air .force-label {
+    color: var(--force-air);
+}
+
+.force-value-item.net .force-label {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.force-value-item .force-number {
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.force-value-item .force-number.bold {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--primary);
+}
+
+/* Velocimeter */
+.velocimeter {
     background: var(--bg-light);
     border-radius: 12px;
     padding: 16px;
@@ -532,9 +654,62 @@ canvas {
     text-align: center;
 }
 
-.speedometer h3 {
+.velocimeter h3 {
     font-size: 0.9rem;
     margin-bottom: 12px;
+    color: var(--text-secondary);
+}
+
+.velocimeter-gauge {
+    position: relative;
+    width: 180px;
+    height: 100px;
+    margin: 0 auto 12px;
+    background: linear-gradient(to right,
+            var(--force-friction) 0%,
+            var(--bg-dark) 40%,
+            var(--bg-dark) 60%,
+            var(--success) 100%);
+    border-radius: 100px 100px 0 0;
+    border: 3px solid var(--border);
+    border-bottom: none;
+    overflow: hidden;
+}
+
+.velocimeter-gauge .needle {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    height: 80px;
+    background: linear-gradient(to top, var(--danger), var(--danger) 70%, transparent 70%);
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(0deg);
+    transition: transform 0.15s ease-out;
+    border-radius: 2px;
+}
+
+.velocimeter-gauge .gauge-labels {
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.velocity-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    font-family: 'Courier New', monospace;
+}
+
+.velocity-value .unit {
+    font-size: 0.9rem;
     color: var(--text-secondary);
 }
 
