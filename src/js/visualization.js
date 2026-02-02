@@ -87,15 +87,8 @@ function draw() {
     // Draw track
     drawTrack();
 
-    // Calculate sled screen position
-    // Map physics position to screen position with wrapping
-    const trackWidth = canvasWidth - 200;
-    let sledScreenX = canvasWidth / 2 + (state.position % (trackWidth / 2)) * 5;
-
-    // Wrap around if sled goes too far
-    if (sledScreenX > canvasWidth - 100) sledScreenX = canvasWidth - 100;
-    if (sledScreenX < 100) sledScreenX = 100;
-
+    // Sled stays fixed at center of screen - background moves instead
+    const sledScreenX = canvasWidth / 2;
     const sledScreenY = canvasHeight * TRACK_Y_RATIO - SLED_HEIGHT / 2 - WHEEL_RADIUS;
 
     // Draw sled
@@ -116,6 +109,7 @@ function draw() {
 /**
  * Draw parallax scrolling background to simulate motion
  * Three layers scroll at different speeds for depth effect
+ * Includes prominent objects (trees, poles, signs) to show motion clearly
  */
 function drawParallaxBackground(velocity) {
     const trackY = canvasHeight * TRACK_Y_RATIO;
@@ -147,42 +141,104 @@ function drawParallaxBackground(velocity) {
         endShape(CLOSE);
     }
 
-    // Layer 2: Middle hills (medium parallax - 0.3x)
-    const hillOffset = bgOffset * 0.3;
-    fill('#3d4a5a');
+    // Layer 2: Trees in background (medium parallax - 0.4x)
+    const treeOffset = bgOffset * 0.4;
+    const treeSpacing = 120;
 
-    for (let i = -1; i <= Math.ceil(canvasWidth / 150) + 1; i++) {
-        const baseX = (i * 150 - (hillOffset % 150));
-        beginShape();
-        vertex(baseX, skyHeight);
-        vertex(baseX + 40, skyHeight - 40);
-        vertex(baseX + 75, skyHeight - 60);
-        vertex(baseX + 110, skyHeight - 35);
-        vertex(baseX + 150, skyHeight);
-        endShape(CLOSE);
+    for (let i = -1; i <= Math.ceil(canvasWidth / treeSpacing) + 2; i++) {
+        const treeX = (i * treeSpacing - (treeOffset % treeSpacing));
+        const treeHeight = 60 + (i % 3) * 15; // Vary heights
+
+        // Tree trunk
+        fill('#4a3728');
+        rect(treeX - 4, skyHeight - treeHeight, 8, treeHeight);
+
+        // Tree foliage (triangle)
+        fill('#2d5a3d');
+        triangle(
+            treeX, skyHeight - treeHeight - 40,
+            treeX - 25, skyHeight - treeHeight + 10,
+            treeX + 25, skyHeight - treeHeight + 10
+        );
+        triangle(
+            treeX, skyHeight - treeHeight - 25,
+            treeX - 20, skyHeight - treeHeight + 20,
+            treeX + 20, skyHeight - treeHeight + 20
+        );
     }
 
-    // Layer 3: Ground/track stripes (fastest parallax - 1x)
-    const stripeOffset = bgOffset * 1.0;
-    const stripeWidth = 80;
-    const stripeSpacing = 160;
+    // Layer 3: Utility poles (faster parallax - 0.7x) - very prominent
+    const poleOffset = bgOffset * 0.7;
+    const poleSpacing = 200;
+
+    for (let i = -1; i <= Math.ceil(canvasWidth / poleSpacing) + 2; i++) {
+        const poleX = (i * poleSpacing - (poleOffset % poleSpacing));
+
+        // Pole
+        fill('#5a5a6a');
+        stroke('#4a4a5a');
+        strokeWeight(1);
+        rect(poleX - 3, skyHeight - 100, 6, 100);
+
+        // Crossbar
+        rect(poleX - 20, skyHeight - 95, 40, 4);
+
+        // Wires (just visual hints)
+        stroke('#3a3a4a');
+        strokeWeight(1);
+        line(poleX - 18, skyHeight - 93, poleX - 50, skyHeight - 85);
+        line(poleX + 18, skyHeight - 93, poleX + 50, skyHeight - 85);
+        noStroke();
+    }
 
     // Ground area below track
     fill('#2a2a35');
+    noStroke();
     rect(0, trackY + 8, canvasWidth, canvasHeight - trackY - 8);
 
-    // Moving stripes on ground
-    fill('#3a3a45');
-    for (let i = -1; i <= Math.ceil(canvasWidth / stripeSpacing) + 2; i++) {
-        const stripeX = (i * stripeSpacing - (stripeOffset % stripeSpacing));
-        rect(stripeX, trackY + 12, stripeWidth, 6, 2);
+    // Layer 4: Distance markers/signs (1x parallax - moves with track)
+    const signOffset = bgOffset * 1.0;
+    const signSpacing = 300;
+
+    for (let i = -1; i <= Math.ceil(canvasWidth / signSpacing) + 2; i++) {
+        const signX = (i * signSpacing - (signOffset % signSpacing));
+        const distanceValue = Math.floor(Math.abs(bgOffset / 50) + i * 6);
+
+        // Sign post
+        fill('#6a6a7a');
+        rect(signX - 2, trackY - 60, 4, 60);
+
+        // Sign board
+        fill('#1a5a8a');
+        stroke('#2a7aaa');
+        strokeWeight(2);
+        rect(signX - 25, trackY - 80, 50, 25, 3);
+
+        // Distance text
+        noStroke();
+        fill('#ffffff');
+        textSize(12);
+        textAlign(CENTER, CENTER);
+        text(`${distanceValue}m`, signX, trackY - 68);
     }
 
-    // Additional ground details - small markers
+    // Layer 5: Ground stripes (fastest - 1.5x for speed emphasis)
+    const stripeOffset = bgOffset * 1.5;
+    const stripeSpacing = 60;
+
     fill('#4a4a55');
-    for (let i = -1; i <= Math.ceil(canvasWidth / 40) + 2; i++) {
-        const markerX = (i * 40 - (stripeOffset % 40));
-        rect(markerX, trackY + 20, 4, 4);
+    noStroke();
+    for (let i = -1; i <= Math.ceil(canvasWidth / stripeSpacing) + 3; i++) {
+        const stripeX = (i * stripeSpacing - (stripeOffset % stripeSpacing));
+        rect(stripeX, trackY + 12, 30, 4, 2);
+    }
+
+    // Ground dashes (very fast - 2x)
+    const dashOffset = bgOffset * 2.0;
+    fill('#5a5a65');
+    for (let i = -1; i <= Math.ceil(canvasWidth / 25) + 3; i++) {
+        const dashX = (i * 25 - (dashOffset % 25));
+        rect(dashX, trackY + 22, 10, 2);
     }
 }
 
