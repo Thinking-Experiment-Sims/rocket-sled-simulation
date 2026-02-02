@@ -17,6 +17,10 @@ let showGrid = false;
 // Jet animation
 let jetFlameOffset = 0;
 
+// Snow system configuration
+const SNOW_COUNT = 100;
+const snowParticles = [];
+
 // Parallax background scrolling
 let bgOffset = 0; // Tracks cumulative background position
 
@@ -418,14 +422,18 @@ function drawPenguin(x, y, facing) {
     pop();
 }
 
-// Snow system configuration
-const SNOW_COUNT = 100;
-const snowParticles = [];
+
 
 /**
  * Initialize snow system
  */
 function initSnow() {
+    console.log('Initializing snow with dimensions:', canvasWidth, canvasHeight);
+    if (!canvasWidth || !canvasHeight) {
+        canvasWidth = window.innerWidth;
+        canvasHeight = window.innerHeight;
+    }
+
     for (let i = 0; i < SNOW_COUNT; i++) {
         snowParticles.push({
             x: Math.random() * canvasWidth,
