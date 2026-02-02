@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeUI();
     setupEventListeners();
     checkEmbedMode();
+    setupModals();
 
     // Start the physics loop
     lastTime = performance.now();
@@ -415,3 +416,114 @@ function toggleSimulation() {
         lastTime = performance.now();
     }
 }
+
+/**
+ * Initialize Modals and Quiz
+ */
+function setupModals() {
+    const helpBtn = document.getElementById('helpBtn');
+    const quizBtn = document.getElementById('quizBtn');
+    const helpModal = document.getElementById('helpModal');
+    const quizModal = document.getElementById('quizModal');
+    const closeBtns = document.querySelectorAll('.close-modal');
+
+    // Open Help
+    helpBtn?.addEventListener('click', () => {
+        openModal(helpModal);
+    });
+
+    // Open Quiz
+    quizBtn?.addEventListener('click', () => {
+        resetQuiz();
+        openModal(quizModal);
+    });
+
+    // Close Modals
+    closeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            closeModal(helpModal);
+            closeModal(quizModal);
+        });
+    });
+
+    // Click outside to close
+    window.addEventListener('click', (e) => {
+        if (e.target === helpModal) closeModal(helpModal);
+        if (e.target === quizModal) closeModal(quizModal);
+    });
+}
+
+function openModal(modal) {
+    if (!modal) return;
+    modal.style.display = 'block';
+    // Small delay to allow CSS transition
+    setTimeout(() => modal.classList.add('show'), 10);
+    // Pause simulation when modal is open
+    isRunning = false;
+}
+
+function closeModal(modal) {
+    if (!modal) return;
+    modal.classList.remove('show');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        // Resume simulation
+        isRunning = true;
+        lastTime = performance.now();
+    }, 300);
+}
+
+// --- Quiz Logic ---
+
+function resetQuiz() {
+    // Reset all questions to initial state
+    document.querySelectorAll('.quiz-question').forEach(q => {
+        q.classList.remove('active');
+        q.querySelector('.feedback').innerHTML = '';
+        q.querySelector('.next-btn').classList.add('hidden');
+        q.querySelectorAll('.quiz-opt').forEach(opt => {
+            opt.classList.remove('correct', 'incorrect');
+            opt.style.pointerEvents = 'auto'; // Re-enable clicks
+        });
+    });
+    // Show first question
+    document.querySelector('.quiz-question[data-q="1"]')?.classList.add('active');
+}
+
+// Make these global so HTML onclick works
+window.checkAnswer = function (btn, isCorrect) {
+    const parent = btn.closest('.quiz-question');
+    const feedback = parent.querySelector('.feedback');
+    const nextBtn = parent.querySelector('.next-btn');
+
+    // Disable all options in this question
+    parent.querySelectorAll('.quiz-opt').forEach(opt => {
+        opt.style.pointerEvents = 'none';
+        if (opt === btn) {
+            if (isCorrect) {
+                opt.classList.add('correct');
+                feedback.innerHTML = '<span style="color: #4CAF50">✅ Correct!</span>';
+            } else {
+                opt.classList.add('incorrect');
+                feedback.innerHTML = '<span style="color: #F44336">❌ Try again! (Reset quiz to retry)</span>';
+            }
+        }
+    });
+
+    // Always show next button regardless of right/wrong (educational flow)
+    nextBtn.classList.remove('hidden');
+};
+
+window.nextQuestion = function (currentId) {
+    const current = document.querySelector(`.quiz-question[data-q="${currentId}"]`);
+    const next = document.querySelector(`.quiz-question[data-q="${currentId + 1}"]`);
+
+    if (current && next) {
+        current.classList.remove('active');
+        next.classList.add('active');
+    }
+};
+
+window.closeQuiz = function () {
+    closeModal(document.getElementById('quizModal'));
+};

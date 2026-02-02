@@ -7,7 +7,7 @@
     <title>Rocket Sled - Newton's Laws Simulation</title>
     <meta name="description"
         content="Interactive physics simulation demonstrating Newton's Laws with a rocket sled. Explore forces, friction, and air drag effects on motion.">
-    <link rel="stylesheet" href="src/css/app.css?v=20260202v4">
+    <link rel="stylesheet" href="src/css/app.css?v=20260202v6">
 </head>
 
 <body>
@@ -128,8 +128,8 @@
                 <h2>📊 Simulation</h2>
 
                 <div class="viz-controls">
-                    <button id="forceArrowsBtn" class="viz-btn active">📊 Force Arrows</button>
-                    <button id="gridBtn" class="viz-btn active">📐 Grid</button>
+                    <button id="forceArrowsBtn" class="viz-btn">📊 Force Arrows</button>
+                    <button id="gridBtn" class="viz-btn">📐 Grid</button>
                 </div>
 
                 <div id="canvasContainer"></div>
@@ -227,8 +227,94 @@
                         <li>Try: Get to red zone, reverse thrust, watch inertia!</li>
                     </ul>
                 </div>
+
+                <!-- Pedagogical Tools -->
+                <div class="quiz-section" style="margin-top: 20px;">
+                    <button id="quizBtn" class="btn-primary" style="width: 100%; background: #9C27B0;">
+                        <span>❓</span> Check Understanding
+                    </button>
+                </div>
             </aside>
         </main>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>🚀 Rocket Sled Instructions</h2>
+            <div class="modal-body">
+                <h3>Goal</h3>
+                <p>Learn how forces affect motion using Newton's Laws.</p>
+
+                <h3>Controls</h3>
+                <ul>
+                    <li><strong>Slider / Arrow Keys:</strong> Control the thrust form the rockets. Left/Right direction.
+                    </li>
+                    <li><strong>Friction Toggle:</strong> Turn on ground friction (opposes sliding).</li>
+                    <li><strong>Air Drag Toggle:</strong> Turn on air resistance (increases with speed).</li>
+                </ul>
+
+                <h3>Challenges to Try</h3>
+                <ol>
+                    <li><strong>Newton's 1st Law:</strong> Turn OFF friction/drag. Get the sled moving, then turn thrust
+                        OFF. What happens?</li>
+                    <li><strong>Terminal Velocity:</strong> Turn ON air drag. Apply full force. Does speed increase
+                        forever?</li>
+                    <li><strong>Equilibrium:</strong> Can you find a force setting where the sled moves at CONSTANT
+                        speed with friction on?</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>🧠 Physics Knowledge Check</h2>
+            <div id="quizContainer">
+                <!-- Question 1 -->
+                <div class="quiz-question active" data-q="1">
+                    <h3>Question 1/3</h3>
+                    <p>If the sled is moving to the RIGHT, which way does Friction point?</p>
+                    <div class="quiz-options">
+                        <button class="quiz-opt" onclick="checkAnswer(this, false)">Right (with motion)</button>
+                        <button class="quiz-opt" onclick="checkAnswer(this, true)">Left (opposing motion)</button>
+                        <button class="quiz-opt" onclick="checkAnswer(this, false)">Up (perpendicular)</button>
+                    </div>
+                    <div class="feedback"></div>
+                    <button class="next-btn hidden" onclick="nextQuestion(1)">Next ➡️</button>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="quiz-question" data-q="2">
+                    <h3>Question 2/3</h3>
+                    <p>If you turn OFF the rockets while moving on frictionless ice (no drag), what happens?</p>
+                    <div class="quiz-options">
+                        <button class="quiz-opt" onclick="checkAnswer(this, false)">It stops immediately</button>
+                        <button class="quiz-opt" onclick="checkAnswer(this, false)">It slowly slows down</button>
+                        <button class="quiz-opt" onclick="checkAnswer(this, true)">It creates constant velocity
+                            forever</button>
+                    </div>
+                    <div class="feedback"></div>
+                    <button class="next-btn hidden" onclick="nextQuestion(2)">Next ➡️</button>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="quiz-question" data-q="3">
+                    <h3>Question 3/3</h3>
+                    <p>When the Net Force is ZERO, what is the acceleration?</p>
+                    <div class="quiz-options">
+                        <button class="quiz-opt" onclick="checkAnswer(this, true)">Zero (0 m/s²)</button>
+                        <button class="quiz-opt" onclick="checkAnswer(this, false)">Positive</button>
+                        <button class="quiz-opt" onclick="checkAnswer(this, false)">Negative</button>
+                    </div>
+                    <div class="feedback"></div>
+                    <button class="next-btn hidden" onclick="closeQuiz()">Finish 🎉</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Footer -->
@@ -242,13 +328,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
 
     <!-- Physics Engine -->
-    <script src="src/js/physics.js?v=20260202v4"></script>
+    <script src="src/js/physics.js?v=20260202v5"></script>
 
     <!-- Visualization (p5.js sketch) -->
-    <script src="src/js/visualization.js?v=20260202v4"></script>
+    <script src="src/js/visualization.js?v=20260202v5"></script>
 
     <!-- Main Application Controller -->
-    <script src="src/js/main.js?v=20260202v4"></script>
+    <script src="src/js/main.js?v=20260202v5"></script>
 </body>
 
 </html>
