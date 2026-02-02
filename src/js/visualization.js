@@ -79,7 +79,7 @@ function draw() {
     // Draw parallax background layers
     drawParallaxBackground(state.velocity);
 
-    // Draw grid if enabled
+    // Draw grid if enabled (on top of background)
     if (showGrid) {
         drawGrid();
     }
@@ -141,53 +141,56 @@ function drawParallaxBackground(velocity) {
         endShape(CLOSE);
     }
 
-    // Layer 2: Trees in background (medium parallax - 0.4x)
+    // Layer 2: Trees in background (medium parallax - 0.4x) - LARGER and BRIGHTER
     const treeOffset = bgOffset * 0.4;
-    const treeSpacing = 120;
+    const treeSpacing = 150;
 
     for (let i = -1; i <= Math.ceil(canvasWidth / treeSpacing) + 2; i++) {
         const treeX = (i * treeSpacing - (treeOffset % treeSpacing));
-        const treeHeight = 60 + (i % 3) * 15; // Vary heights
+        const treeHeight = 80 + (i % 3) * 20; // Taller trees
 
-        // Tree trunk
-        fill('#4a3728');
-        rect(treeX - 4, skyHeight - treeHeight, 8, treeHeight);
+        // Tree trunk - brown
+        fill('#8B4513');
+        noStroke();
+        rect(treeX - 6, skyHeight - treeHeight, 12, treeHeight);
 
-        // Tree foliage (triangle)
-        fill('#2d5a3d');
+        // Tree foliage - bright green triangles
+        fill('#228B22');
         triangle(
-            treeX, skyHeight - treeHeight - 40,
-            treeX - 25, skyHeight - treeHeight + 10,
-            treeX + 25, skyHeight - treeHeight + 10
+            treeX, skyHeight - treeHeight - 50,
+            treeX - 35, skyHeight - treeHeight + 15,
+            treeX + 35, skyHeight - treeHeight + 15
         );
+        fill('#2E8B2E');
         triangle(
-            treeX, skyHeight - treeHeight - 25,
-            treeX - 20, skyHeight - treeHeight + 20,
-            treeX + 20, skyHeight - treeHeight + 20
+            treeX, skyHeight - treeHeight - 30,
+            treeX - 28, skyHeight - treeHeight + 25,
+            treeX + 28, skyHeight - treeHeight + 25
         );
     }
 
-    // Layer 3: Utility poles (faster parallax - 0.7x) - very prominent
+    // Layer 3: Utility poles (faster parallax - 0.7x) - TALLER and more visible
     const poleOffset = bgOffset * 0.7;
-    const poleSpacing = 200;
+    const poleSpacing = 250;
 
     for (let i = -1; i <= Math.ceil(canvasWidth / poleSpacing) + 2; i++) {
         const poleX = (i * poleSpacing - (poleOffset % poleSpacing));
 
-        // Pole
-        fill('#5a5a6a');
-        stroke('#4a4a5a');
-        strokeWeight(1);
-        rect(poleX - 3, skyHeight - 100, 6, 100);
+        // Pole - gray with outline
+        fill('#808080');
+        stroke('#606060');
+        strokeWeight(2);
+        rect(poleX - 4, skyHeight - 120, 8, 120);
 
-        // Crossbar
-        rect(poleX - 20, skyHeight - 95, 40, 4);
+        // Crossbar - bright
+        fill('#A0A0A0');
+        rect(poleX - 25, skyHeight - 115, 50, 6);
 
-        // Wires (just visual hints)
-        stroke('#3a3a4a');
-        strokeWeight(1);
-        line(poleX - 18, skyHeight - 93, poleX - 50, skyHeight - 85);
-        line(poleX + 18, skyHeight - 93, poleX + 50, skyHeight - 85);
+        // Yellow warning markers on pole
+        fill('#FFD700');
+        noStroke();
+        rect(poleX - 5, skyHeight - 30, 10, 20);
+
         noStroke();
     }
 
@@ -196,49 +199,53 @@ function drawParallaxBackground(velocity) {
     noStroke();
     rect(0, trackY + 8, canvasWidth, canvasHeight - trackY - 8);
 
-    // Layer 4: Distance markers/signs (1x parallax - moves with track)
+    // Layer 4: Distance markers/signs (1x parallax) - LARGER and BRIGHTER
     const signOffset = bgOffset * 1.0;
-    const signSpacing = 300;
+    const signSpacing = 250;
 
     for (let i = -1; i <= Math.ceil(canvasWidth / signSpacing) + 2; i++) {
         const signX = (i * signSpacing - (signOffset % signSpacing));
         const distanceValue = Math.floor(Math.abs(bgOffset / 50) + i * 6);
 
-        // Sign post
-        fill('#6a6a7a');
-        rect(signX - 2, trackY - 60, 4, 60);
+        // Sign post - silver
+        fill('#A0A0A0');
+        stroke('#808080');
+        strokeWeight(1);
+        rect(signX - 3, trackY - 70, 6, 70);
 
-        // Sign board
-        fill('#1a5a8a');
-        stroke('#2a7aaa');
-        strokeWeight(2);
-        rect(signX - 25, trackY - 80, 50, 25, 3);
+        // Sign board - bright blue with yellow border
+        fill('#0066CC');
+        stroke('#FFD700');
+        strokeWeight(3);
+        rect(signX - 30, trackY - 95, 60, 30, 5);
 
-        // Distance text
+        // Distance text - white and bold
         noStroke();
-        fill('#ffffff');
-        textSize(12);
+        fill('#FFFFFF');
+        textSize(14);
+        textStyle(BOLD);
         textAlign(CENTER, CENTER);
-        text(`${distanceValue}m`, signX, trackY - 68);
+        text(`${distanceValue}m`, signX, trackY - 80);
+        textStyle(NORMAL);
     }
 
     // Layer 5: Ground stripes (fastest - 1.5x for speed emphasis)
     const stripeOffset = bgOffset * 1.5;
-    const stripeSpacing = 60;
+    const stripeSpacing = 50;
 
-    fill('#4a4a55');
+    fill('#5a5a65');
     noStroke();
     for (let i = -1; i <= Math.ceil(canvasWidth / stripeSpacing) + 3; i++) {
         const stripeX = (i * stripeSpacing - (stripeOffset % stripeSpacing));
-        rect(stripeX, trackY + 12, 30, 4, 2);
+        rect(stripeX, trackY + 12, 25, 5, 2);
     }
 
-    // Ground dashes (very fast - 2x)
+    // Ground dashes (very fast - 2x) - brighter
     const dashOffset = bgOffset * 2.0;
-    fill('#5a5a65');
-    for (let i = -1; i <= Math.ceil(canvasWidth / 25) + 3; i++) {
-        const dashX = (i * 25 - (dashOffset % 25));
-        rect(dashX, trackY + 22, 10, 2);
+    fill('#7a7a85');
+    for (let i = -1; i <= Math.ceil(canvasWidth / 20) + 3; i++) {
+        const dashX = (i * 20 - (dashOffset % 20));
+        rect(dashX, trackY + 22, 8, 3);
     }
 }
 
