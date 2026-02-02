@@ -114,8 +114,11 @@ function setupEventListeners() {
         updateLegend();
     });
 
-    // Reset button
-    resetBtn?.addEventListener('click', handleReset);
+    // Reset button with debug
+    resetBtn?.addEventListener('click', () => {
+        console.log('Reset button clicked');
+        handleReset();
+    });
 
     // Visualization toggles
     forceArrowsBtn?.addEventListener('click', () => {
@@ -126,6 +129,19 @@ function setupEventListeners() {
     gridBtn?.addEventListener('click', () => {
         gridBtn.classList.toggle('active');
         toggleGrid(gridBtn.classList.contains('active'));
+    });
+
+    // Worksheet scenario buttons
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const scenario = btn.dataset.scenario;
+            console.log('Loading scenario:', scenario);
+            loadScenario(scenario);
+
+            // Update active state
+            document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
     });
 }
 
@@ -199,11 +215,101 @@ function handleKeyUp(e) {
  * Handle reset button click
  */
 function handleReset() {
+    console.log('Resetting simulation...');
     resetPhysics();
     if (directionSlider) {
         directionSlider.value = 0;
     }
     updateForceFromSlider(0);
+
+    // Reset toggles to unchecked state
+    if (frictionToggle) {
+        frictionToggle.checked = false;
+        setFrictionEnabled(false);
+    }
+    if (airDragToggle) {
+        airDragToggle.checked = false;
+        setAirDragEnabled(false);
+    }
+
+    // Clear scenario selection
+    document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+
+    updateLegend();
+    updateDisplays();
+    console.log('Reset complete');
+}
+
+/**
+ * Load a preset worksheet scenario
+ */
+function loadScenario(scenario) {
+    // First reset everything
+    resetPhysics();
+    if (directionSlider) directionSlider.value = 0;
+
+    // Configure based on scenario
+    switch (scenario) {
+        case 'no-forces':
+            // Pure Newton's 1st Law - no resistance
+            setFrictionEnabled(false);
+            setAirDragEnabled(false);
+            if (frictionToggle) frictionToggle.checked = false;
+            if (airDragToggle) airDragToggle.checked = false;
+            break;
+
+        case 'friction-only':
+            // Study friction without air drag
+            setFrictionEnabled(true);
+            setAirDragEnabled(false);
+            if (frictionToggle) frictionToggle.checked = true;
+            if (airDragToggle) airDragToggle.checked = false;
+            break;
+
+        case 'air-only':
+            // Study air drag (velocity dependent)
+            setFrictionEnabled(false);
+            setAirDragEnabled(true);
+            if (frictionToggle) frictionToggle.checked = false;
+            if (airDragToggle) airDragToggle.checked = true;
+            break;
+
+        case 'all-forces':
+            // Realistic scenario with all forces
+            setFrictionEnabled(true);
+            setAirDragEnabled(true);
+            if (frictionToggle) frictionToggle.checked = true;
+            if (airDragToggle) airDragToggle.checked = true;
+            break;
+
+        case 'terminal-velocity':
+            // Start with air drag to observe terminal velocity
+            setFrictionEnabled(false);
+            setAirDragEnabled(true);
+            if (frictionToggle) frictionToggle.checked = false;
+            if (airDragToggle) airDragToggle.checked = true;
+            // Apply thrust to demonstrate terminal velocity
+            if (directionSlider) {
+                directionSlider.value = 80;
+                updateForceFromSlider(80);
+            }
+            break;
+
+        case 'equilibrium':
+            // Set up for balanced forces discussion
+            setFrictionEnabled(true);
+            setAirDragEnabled(true);
+            if (frictionToggle) frictionToggle.checked = true;
+            if (airDragToggle) airDragToggle.checked = true;
+            // Medium thrust
+            if (directionSlider) {
+                directionSlider.value = 50;
+                updateForceFromSlider(50);
+            }
+            break;
+    }
+
+    updateLegend();
     updateDisplays();
 }
 

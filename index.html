@@ -7,7 +7,7 @@
     <title>Rocket Sled - Newton's Laws Simulation</title>
     <meta name="description"
         content="Interactive physics simulation demonstrating Newton's Laws with a rocket sled. Explore forces, friction, and air drag effects on motion.">
-    <link rel="stylesheet" href="src/css/app.css?v=20260202v3">
+    <link rel="stylesheet" href="src/css/app.css?v=20260202v4">
 </head>
 
 <body>
@@ -78,6 +78,40 @@
                                 <span class="toggle-slider"></span>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Worksheet Scenarios -->
+                <div class="scenarios-section">
+                    <h3>📋 Worksheet Setups</h3>
+                    <div class="scenario-buttons">
+                        <button class="scenario-btn" data-scenario="no-forces" title="No friction, no air drag">
+                            <span class="scenario-icon">🚀</span>
+                            <span class="scenario-name">No Resistance</span>
+                        </button>
+                        <button class="scenario-btn" data-scenario="friction-only"
+                            title="Friction enabled, no air drag">
+                            <span class="scenario-icon">🔩</span>
+                            <span class="scenario-name">Friction Only</span>
+                        </button>
+                        <button class="scenario-btn" data-scenario="air-only" title="Air drag enabled, no friction">
+                            <span class="scenario-icon">💨</span>
+                            <span class="scenario-name">Air Drag Only</span>
+                        </button>
+                        <button class="scenario-btn" data-scenario="all-forces" title="Both friction and air drag">
+                            <span class="scenario-icon">⚡</span>
+                            <span class="scenario-name">All Forces</span>
+                        </button>
+                        <button class="scenario-btn" data-scenario="terminal-velocity"
+                            title="High speed with air drag to show terminal velocity">
+                            <span class="scenario-icon">🏎️</span>
+                            <span class="scenario-name">Terminal Velocity</span>
+                        </button>
+                        <button class="scenario-btn" data-scenario="equilibrium"
+                            title="Balance forces for zero acceleration">
+                            <span class="scenario-icon">⚖️</span>
+                            <span class="scenario-name">Equilibrium</span>
+                        </button>
                     </div>
                 </div>
 
@@ -208,13 +242,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
 
     <!-- Physics Engine -->
-    <script src="src/js/physics.js?v=20260202v3"></script>
+    <script src="src/js/physics.js?v=20260202v4"></script>
 
     <!-- Visualization (p5.js sketch) -->
-    <script src="src/js/visualization.js?v=20260202v3"></script>
+    <script src="src/js/visualization.js?v=20260202v4"></script>
 
     <!-- Main Application Controller -->
-    <script src="src/js/main.js?v=20260202v3"></script>
+    <script src="src/js/main.js?v=20260202v4"></script>
 </body>
 
 </html>

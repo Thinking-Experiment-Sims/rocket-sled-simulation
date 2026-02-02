@@ -437,6 +437,65 @@ main {
     background-color: white;
 }
 
+/* Worksheet Scenarios */
+.scenarios-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--bg-light);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.scenarios-section h3 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    color: var(--primary);
+}
+
+.scenario-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.scenario-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    background: var(--bg-dark);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.scenario-btn:hover {
+    border-color: var(--primary);
+    background: rgba(0, 188, 212, 0.1);
+}
+
+.scenario-btn.active {
+    border-color: var(--primary);
+    background: rgba(0, 188, 212, 0.2);
+}
+
+.scenario-btn .scenario-icon {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.scenario-btn .scenario-name {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.scenario-btn:hover .scenario-name {
+    color: var(--text-primary);
+}
+
 /* Control Buttons */
 .control-buttons {
     display: flex;
@@ -812,10 +871,17 @@ canvas {
     right: 0;
     display: flex;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 15px;
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.velocimeter-gauge .gauge-labels .center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 5px;
 }
 
 .velocity-value {
@@ -823,6 +889,7 @@ canvas {
     font-weight: 700;
     color: var(--primary);
     font-family: 'Courier New', monospace;
+    text-align: center;
 }
 
 .velocity-value .unit {
