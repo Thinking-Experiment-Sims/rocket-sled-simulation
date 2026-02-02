@@ -101,13 +101,15 @@ function setupEventListeners() {
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
 
-    // Toggles
+    // Toggles - with debug logging
     frictionToggle?.addEventListener('change', (e) => {
+        console.log('Friction toggle changed:', e.target.checked);
         setFrictionEnabled(e.target.checked);
         updateLegend();
     });
 
     airDragToggle?.addEventListener('change', (e) => {
+        console.log('Air drag toggle changed:', e.target.checked);
         setAirDragEnabled(e.target.checked);
         updateLegend();
     });

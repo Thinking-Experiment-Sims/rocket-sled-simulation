@@ -470,14 +470,14 @@ function drawForceDiagram(x, y, state) {
 function drawForceArrow(x, y, dx, dy, color, label) {
     push();
 
-    // Draw BLACK outline first for visibility
+    // Draw black outline for visibility
     stroke(0);
-    strokeWeight(16);
+    strokeWeight(10);
     line(x, y, x + dx, y + dy);
 
-    // Arrow line - VERY THICK
+    // Arrow line - medium thickness
     stroke(color);
-    strokeWeight(12);
+    strokeWeight(6);
     fill(color);
     line(x, y, x + dx, y + dy);
 
