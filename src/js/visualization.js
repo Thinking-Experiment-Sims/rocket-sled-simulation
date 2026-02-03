@@ -213,8 +213,8 @@ function drawParallaxBackground(velocity) {
         noStroke();
     }
 
-    // Ground area below track
-    fill('#2a2a35');
+    // Ground area below track (Snowy White)
+    fill('#E8EAF6');
     noStroke();
     rect(0, trackY + 8, canvasWidth, canvasHeight - trackY - 8);
 
@@ -557,22 +557,22 @@ function drawForceDiagram(x, y, state) {
         );
     }
 
-    // Friction Force (horizontal, opposes motion) - from ground
+    // Friction Force (horizontal, opposes motion) - from ground (Bottom/Wheels)
     if (Math.abs(state.frictionForce) > 0.1) {
         const length = Math.max(Math.abs(state.frictionForce) * scale, minArrowLength);
         drawForceArrow(
-            comX, comY,
+            comX, comY + 25, // Offset DOWN for wheels
             state.frictionForce > 0 ? length : -length, 0,
             COLORS.forceFriction,
             'F friction on Sled by Ground'
         );
     }
 
-    // Air Drag Force (horizontal, opposes motion) - from air
+    // Air Drag Force (horizontal, opposes motion) - from air (Top/Body)
     if (Math.abs(state.airDragForce) > 0.1) {
         const length = Math.max(Math.abs(state.airDragForce) * scale, minArrowLength);
         drawForceArrow(
-            comX, comY,
+            comX, comY - 25, // Offset UP for air
             state.airDragForce > 0 ? length : -length, 0,
             COLORS.forceAir,
             'F drag on Sled by Air'
