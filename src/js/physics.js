@@ -10,7 +10,7 @@ const MAX_FORCE = 5000; // N
 let appliedForceMagnitude = 2000; // N (thrust from rockets, adjustable)
 const FRICTION_COEFFICIENT = 0.15;
 const AIR_DRAG_COEFFICIENT = 0.5;
-const GRAVITY = 9.8; // m/s²
+const GRAVITY = 10.0; // m/s² (simplified for pedagogical purposes)
 const MAX_VELOCITY = 50; // m/s (cap for simulation stability)
 
 // Physics state

@@ -151,7 +151,7 @@ function setupEventListeners() {
  */
 function updateForceFromSlider(sliderValue) {
     // Calculate actual force: percentage of max force * direction
-    const percentage = sliderValue / 100;
+    const percentage = sliderValue / 1000;
     const actualForce = Math.round(percentage * maxForce);
 
     // Update physics engine
@@ -289,10 +289,10 @@ function loadScenario(scenario) {
             setAirDragEnabled(true);
             if (frictionToggle) frictionToggle.checked = false;
             if (airDragToggle) airDragToggle.checked = true;
-            // Apply thrust to demonstrate terminal velocity
+            // Apply thrust to demonstrate terminal velocity (80% -> 800)
             if (directionSlider) {
-                directionSlider.value = 80;
-                updateForceFromSlider(80);
+                directionSlider.value = 800;
+                updateForceFromSlider(800);
             }
             break;
 
@@ -302,10 +302,10 @@ function loadScenario(scenario) {
             setAirDragEnabled(true);
             if (frictionToggle) frictionToggle.checked = true;
             if (airDragToggle) airDragToggle.checked = true;
-            // Medium thrust
+            // Medium thrust (Set to 375, which corresponds to 750N = Friction Force)
             if (directionSlider) {
-                directionSlider.value = 50;
-                updateForceFromSlider(50);
+                directionSlider.value = 375;
+                updateForceFromSlider(375);
             }
             break;
     }
