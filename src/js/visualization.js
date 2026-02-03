@@ -543,8 +543,8 @@ function drawForceDiagram(x, y, state) {
     const comY = y + SLED_HEIGHT / 2;
 
     // INCREASED scale for larger arrows
-    const scale = 0.08; // Pixels per Newton - MUCH LARGER
-    const minArrowLength = 60; // Minimum visible arrow length
+    const scale = 0.025; // Adjusted for compact canvas (5000N ~ 125px)
+    const minArrowLength = 20; // Allow smaller arrows for small forces
 
     // Applied Force (horizontal) - from rockets
     if (state.appliedForce !== 0) {
