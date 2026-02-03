@@ -604,7 +604,9 @@ main {
 }
 
 #canvasContainer {
-    flex: 1;
+    flex: 0 0 280px;
+    /* Fixed height! Stop growing! */
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -613,7 +615,6 @@ main {
     border: 1px solid var(--border);
     overflow: hidden;
     position: relative;
-    min-height: 200px;
 }
 
 canvas {
