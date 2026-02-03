@@ -174,6 +174,30 @@ function setupEventListeners() {
             updateForceFromSlider(0);
         }
     });
+
+    // Dropdown Menu Toggle
+    const menuBtn = document.getElementById('menuBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    menuBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownMenu?.classList.toggle('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (dropdownMenu && !dropdownMenu.contains(e.target) && e.target !== menuBtn) {
+            dropdownMenu.classList.remove('show');
+        }
+    });
+
+    // Close dropdown when clicking menu items
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            dropdownMenu?.classList.remove('show');
+        });
+    });
+
 }
 
 /**

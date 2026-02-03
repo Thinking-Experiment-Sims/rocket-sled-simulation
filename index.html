@@ -93,53 +93,7 @@
                     </div>
                 </div>
 
-                <!-- Worksheet Scenarios -->
-                <div class="scenarios-section">
-                    <h3>📋 Worksheet Setups</h3>
-                    <div class="scenario-buttons">
-                        <button class="scenario-btn" data-scenario="no-forces" title="No friction, no air drag">
-                            <span class="scenario-icon">🚀</span>
-                            <span class="scenario-name">No Resistance</span>
-                        </button>
-                        <button class="scenario-btn" data-scenario="friction-only"
-                            title="Friction enabled, no air drag">
-                            <span class="scenario-icon">🔩</span>
-                            <span class="scenario-name">Friction Only</span>
-                        </button>
-                        <button class="scenario-btn" data-scenario="air-only" title="Air drag enabled, no friction">
-                            <span class="scenario-icon">💨</span>
-                            <span class="scenario-name">Air Drag Only</span>
-                        </button>
-                        <button class="scenario-btn" data-scenario="all-forces" title="Both friction and air drag">
-                            <span class="scenario-icon">⚡</span>
-                            <span class="scenario-name">All Forces</span>
-                        </button>
-                        <button class="scenario-btn" data-scenario="terminal-velocity"
-                            title="High speed with air drag to show terminal velocity">
-                            <span class="scenario-icon">🏎️</span>
-                            <span class="scenario-name">Terminal Velocity</span>
-                        </button>
-                        <button class="scenario-btn" data-scenario="equilibrium"
-                            title="Balance forces for zero acceleration">
-                            <span class="scenario-icon">⚖️</span>
-                            <span class="scenario-name">Equilibrium</span>
-                        </button>
-                    </div>
-                </div>
 
-                <!-- Control Buttons -->
-                <div class="control-buttons">
-                    <button id="resetBtn" class="btn-secondary">
-                        <span>🔄</span> Reset
-                    </button>
-                </div>
-
-                <!-- Pedagogical Tools -->
-                <div class="quiz-section" style="margin-top: 20px;">
-                    <button id="quizBtn" class="btn-primary" style="width: 100%; background: #9C27B0;">
-                        <span>❓</span> Check Understanding
-                    </button>
-                </div>
             </aside>
 
             <!-- CENTER PANEL: Visualization -->
@@ -149,6 +103,54 @@
                 <div class="viz-controls">
                     <button id="forceArrowsBtn" class="viz-btn">📊 Force Arrows</button>
                     <button id="gridBtn" class="viz-btn">📐 Grid</button>
+
+                    <!-- Dropdown Menu -->
+                    <div class="dropdown-container">
+                        <button id="menuBtn" class="viz-btn menu-btn">☰ Menu</button>
+                        <div id="dropdownMenu" class="dropdown-menu">
+                            <!-- Worksheet Setups -->
+                            <div class="menu-section">
+                                <div class="menu-header">📋 Worksheet Setups</div>
+                                <button class="menu-item scenario-btn" data-scenario="no-forces"
+                                    title="No friction, no air drag">
+                                    🚀 No Resistance
+                                </button>
+                                <button class="menu-item scenario-btn" data-scenario="friction-only"
+                                    title="Friction enabled, no air drag">
+                                    🔩 Friction Only
+                                </button>
+                                <button class="menu-item scenario-btn" data-scenario="air-only"
+                                    title="Air drag enabled, no friction">
+                                    💨 Air Drag Only
+                                </button>
+                                <button class="menu-item scenario-btn" data-scenario="all-forces"
+                                    title="Both friction and air drag">
+                                    ⚡ All Forces
+                                </button>
+                                <button class="menu-item scenario-btn" data-scenario="terminal-velocity"
+                                    title="High speed with air drag to show terminal velocity">
+                                    🏎️ Terminal Velocity
+                                </button>
+                                <button class="menu-item scenario-btn" data-scenario="equilibrium"
+                                    title="Balance forces for zero acceleration">
+                                    ⚖️ Equilibrium
+                                </button>
+                            </div>
+
+                            <!-- Divider -->
+                            <div class="menu-divider"></div>
+
+                            <!-- Actions -->
+                            <div class="menu-section">
+                                <button id="resetBtn" class="menu-item">
+                                    🔄 Reset
+                                </button>
+                                <button id="quizBtn" class="menu-item">
+                                    ❓ Check Understanding
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="canvasContainer">
