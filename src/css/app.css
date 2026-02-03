@@ -374,8 +374,9 @@ main {
 .toggle-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 16px;
 }
+
 
 .toggle-item {
     display: flex;
