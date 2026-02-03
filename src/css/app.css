@@ -553,7 +553,8 @@ main {
 .visualization-section {
     display: flex;
     flex-direction: column;
-    padding: 16px;
+    padding: 10px;
+    /* Reduced from 16px */
     overflow: hidden;
     flex: 1;
     min-height: 0;
@@ -611,7 +612,8 @@ main {
     border: 1px solid var(--border);
     overflow: hidden;
     position: relative;
-    min-height: 350px;
+    min-height: 250px;
+    /* Reduced from 350px */
 }
 
 canvas {
@@ -621,12 +623,14 @@ canvas {
     left: 0;
 }
 
-/* Direction Control (below canvas) - LARGE like reference */
+/* Direction Control (below canvas) - Compacted */
 .direction-control {
-    margin-top: 20px;
-    padding: 30px;
+    margin-top: 8px;
+    /* Reduced from 20px */
+    padding: 15px;
+    /* Reduced from 30px */
     background: linear-gradient(to bottom, var(--bg-dark), #0a0d12);
-    border-radius: 16px;
+    border-radius: 12px;
     border: 2px solid var(--border);
 }
 
