@@ -144,6 +144,15 @@ function setupEventListeners() {
             btn.classList.add('active');
         });
     });
+
+    // Zero Force / Cut Engines Button
+    const cutEnginesBtn = document.getElementById('cutEnginesBtn');
+    cutEnginesBtn?.addEventListener('click', () => {
+        if (directionSlider) {
+            directionSlider.value = 0;
+            updateForceFromSlider(0);
+        }
+    });
 }
 
 /**
