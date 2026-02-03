@@ -192,11 +192,12 @@ function setupEventListeners() {
     });
 
     // Close dropdown when clicking menu items
-    document.querySelectorAll('.menu-item').forEach(item => {
+    document.querySelectorAll('.scenario-btn').forEach(item => {
         item.addEventListener('click', () => {
             dropdownMenu?.classList.remove('show');
         });
     });
+
 
 }
 
