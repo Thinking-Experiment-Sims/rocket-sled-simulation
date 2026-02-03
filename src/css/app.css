@@ -108,6 +108,15 @@ body {
     transform: translateY(-1px);
 }
 
+.header-btn.quiz-btn {
+    background: #9C27B0;
+}
+
+.header-btn.quiz-btn:hover {
+    background: #7B1FA2;
+}
+
+
 /* ========================================
    Main Layout
    ======================================== */
