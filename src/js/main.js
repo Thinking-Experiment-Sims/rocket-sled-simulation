@@ -7,6 +7,7 @@
 let directionSlider, forceValueDisplay;
 let maxForceSlider, maxForceValueDisplay;
 let frictionToggle, airDragToggle;
+let frictionSlider, frictionCoeffDisplay; // New
 let resetBtn;
 let forceArrowsBtn, gridBtn;
 
@@ -14,7 +15,7 @@ let forceArrowsBtn, gridBtn;
 let appliedForceValueEl, frictionForceValueEl, airDragForceValueEl, netForceValueEl;
 
 // Velocimeter elements
-let velocimeterNeedle, velocityDisplay;
+let velocimeterNeedle, velocityDisplay, velocimeterGauge;
 
 // Animation state
 let isRunning = true;
@@ -67,6 +68,11 @@ function initializeUI() {
     // Velocimeter
     velocimeterNeedle = document.getElementById('velocimeterNeedle');
     velocityDisplay = document.getElementById('velocityDisplay');
+    velocimeterGauge = document.querySelector('.velocimeter-gauge-mini');
+
+    // Friction slider
+    frictionSlider = document.getElementById('frictionSlider');
+    frictionCoeffDisplay = document.getElementById('frictionCoeffValue');
 
     // Visualization buttons
     forceArrowsBtn = document.getElementById('forceArrowsBtn');
@@ -143,6 +149,21 @@ function setupEventListeners() {
             document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
         });
+    });
+
+    // Friction Slider input
+    frictionSlider?.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        if (frictionCoeffDisplay) {
+            frictionCoeffDisplay.textContent = val.toFixed(2);
+        }
+        setFrictionCoefficient(val);
+        // Auto-enable friction toggle if slider > 0
+        if (val > 0 && frictionToggle && !frictionToggle.checked) {
+            frictionToggle.checked = true;
+            setFrictionEnabled(true);
+            updateLegend();
+        }
     });
 
     // Zero Force / Cut Engines Button
@@ -379,6 +400,13 @@ function updateDisplays() {
         const rotation = (velocity / maxVelocity) * 90;
         const clampedRotation = Math.max(-90, Math.min(90, rotation));
         velocimeterNeedle.style.transform = `translateX(-50%) rotate(${clampedRotation}deg)`;
+
+        // Red Zone Alert (> 48 m/s)
+        if (Math.abs(velocity) > 48) {
+            velocimeterGauge?.classList.add('danger');
+        } else {
+            velocimeterGauge?.classList.remove('danger');
+        }
     }
 }
 

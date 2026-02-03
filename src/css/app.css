@@ -1510,3 +1510,20 @@ body.embed #canvasContainer {
     opacity: 0.3;
     filter: grayscale(100%);
 }
+
+/* Red Zone Alert */
+.velocimeter-gauge-mini.danger {
+    background: linear-gradient(90deg, #ff1744 0%, #d50000 100%);
+    box-shadow: 0 0 15px rgba(255, 23, 68, 0.7);
+    animation: pulse-danger 0.5s infinite alternate;
+}
+
+@keyframes pulse-danger {
+    from {
+        box-shadow: 0 0 10px rgba(255, 23, 68, 0.5);
+    }
+
+    to {
+        box-shadow: 0 0 20px rgba(255, 23, 68, 0.9);
+    }
+}

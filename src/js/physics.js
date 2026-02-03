@@ -8,7 +8,7 @@ const SLED_MASS = 500; // kg
 const MIN_FORCE = 500; // N
 const MAX_FORCE = 5000; // N
 let appliedForceMagnitude = 2000; // N (thrust from rockets, adjustable)
-const FRICTION_COEFFICIENT = 0.15;
+let frictionCoefficient = 0.15;
 const AIR_DRAG_COEFFICIENT = 0.5;
 const GRAVITY = 10.0; // m/s² (simplified for pedagogical purposes)
 const MAX_VELOCITY = 50; // m/s (cap for simulation stability)
@@ -98,6 +98,22 @@ function getAppliedForceMagnitude() {
 }
 
 /**
+ * Set friction coefficient
+ * @param {number} value - Coefficient between 0.0 and 1.0
+ */
+function setFrictionCoefficient(value) {
+    frictionCoefficient = Math.max(0, Math.min(1.0, value));
+}
+
+/**
+ * Get friction coefficient
+ * @returns {number} Current coefficient
+ */
+function getFrictionCoefficient() {
+    return frictionCoefficient;
+}
+
+/**
  * Calculate all forces and update the physics state
  * @param {number} dt - Time step in seconds
  */
@@ -111,7 +127,7 @@ function updatePhysics(dt) {
 
     // Calculate friction force (opposes motion, only when moving)
     if (physicsState.frictionEnabled && Math.abs(physicsState.velocity) > 0.01) {
-        const frictionMagnitude = FRICTION_COEFFICIENT * physicsState.normalForce;
+        const frictionMagnitude = frictionCoefficient * physicsState.normalForce;
         physicsState.frictionForce = -Math.sign(physicsState.velocity) * frictionMagnitude;
     } else {
         physicsState.frictionForce = 0;
@@ -120,7 +136,7 @@ function updatePhysics(dt) {
     // Static friction check - prevents motion if applied force is less than static friction
     if (physicsState.frictionEnabled &&
         Math.abs(physicsState.velocity) < 0.01 &&
-        Math.abs(physicsState.appliedForce) < FRICTION_COEFFICIENT * physicsState.normalForce * 1.1) {
+        Math.abs(physicsState.appliedForce) < frictionCoefficient * physicsState.normalForce * 1.1) {
         // Static friction case - sled doesn't move
         physicsState.frictionForce = -physicsState.appliedForce;
     }
