@@ -49,7 +49,11 @@ const COLORS = {
 
 // p5.js preload function - loads assets before setup
 function preload() {
-    pugImage = loadImage('pug.png');
+    console.log('Attempting to load pug image...');
+    pugImage = loadImage('pug.png',
+        () => console.log('Pug image loaded successfully!'),
+        (err) => console.error('Failed to load pug image:', err)
+    );
 }
 
 // p5.js setup function
@@ -382,19 +386,41 @@ function drawPenguin(x, y, facing) {
     translate(x, y);
 
     // Check if image is loaded
-    if (pugImage) {
+    if (pugImage && pugImage.width > 0) {
         // Scale and position the pug
-        // The pug image will be sized to fit nicely on the sled
-        const pugWidth = 50;
-        const pugHeight = 50;
+        const pugSize = 60; // Slightly larger for better visibility
+
+        // Draw with circular mask to remove white background
+        push();
+        // Create circular clipping mask
+        drawingContext.save();
+        drawingContext.beginPath();
+        drawingContext.arc(0, -10, pugSize / 2, 0, Math.PI * 2);
+        drawingContext.clip();
 
         imageMode(CENTER);
-        image(pugImage, 0, -10, pugWidth, pugHeight);
+        image(pugImage, 0, -10, pugSize, pugSize);
+
+        drawingContext.restore();
+        pop();
     } else {
-        // Fallback: draw a simple placeholder if image hasn't loaded
-        fill(100);
+        // Fallback: draw a simple dog placeholder if image hasn't loaded
+        fill(139, 69, 19); // Brown color for dog
         noStroke();
-        ellipse(0, 0, 30, 30);
+        ellipse(0, -10, 40, 40); // Head
+        ellipse(0, 5, 35, 30); // Body
+
+        // Ears
+        fill(101, 50, 15);
+        ellipse(-15, -15, 15, 20);
+        ellipse(15, -15, 15, 20);
+
+        // Eyes
+        fill(0);
+        ellipse(-8, -12, 5, 5);
+        ellipse(8, -12, 5, 5);
+
+        console.log('Pug image not loaded, showing placeholder');
     }
 
     pop();
