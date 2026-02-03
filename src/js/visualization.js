@@ -104,6 +104,7 @@ function draw() {
     // Draw force diagram if enabled
     if (showForceArrows) {
         drawForceDiagram(sledScreenX, sledScreenY, state);
+        drawFreeBodyDiagramOverlay(state);
     }
 
     // Draw snow (on top of everything for depth)
@@ -534,72 +535,201 @@ function drawRocket(x, y, direction, active) {
 
 /**
  * Draw force diagram centered on the sled's center of mass
- * All forces originate from the center of mass
- * Uses notation: "F Type on Sled by Source"
+ * Main View: Arrows ONLY (no text) to avoid clutter
  */
 function drawForceDiagram(x, y, state) {
     // Center of mass position (center of the sled body)
     const comX = x;
     const comY = y + SLED_HEIGHT / 2;
 
-    // INCREASED scale for larger arrows
-    const scale = 0.025; // Adjusted for compact canvas (5000N ~ 125px)
-    const minArrowLength = 20; // Allow smaller arrows for small forces
+    // Scale for main view arrows
+    const scale = 0.05;
+    const minArrowLength = 40;
 
-    // Applied Force (horizontal) - from rockets
+    // Applied Force (horizontal)
     if (state.appliedForce !== 0) {
         const length = Math.max(Math.abs(state.appliedForce) * scale, minArrowLength);
-        drawForceArrow(
-            comX, comY,
-            state.appliedForce > 0 ? length : -length, 0,
-            COLORS.forceApplied,
-            'Push'
-        );
+        drawForceArrow(comX, comY, state.appliedForce > 0 ? length : -length, 0, COLORS.forceApplied, '');
     }
 
-    // Friction Force (horizontal, opposes motion) - from ground (Bottom/Wheels)
+    // Friction Force (horizontal)
     if (Math.abs(state.frictionForce) > 0.1) {
         const length = Math.max(Math.abs(state.frictionForce) * scale, minArrowLength);
-        drawForceArrow(
-            comX, comY + 25, // Offset DOWN for wheels
-            state.frictionForce > 0 ? length : -length, 0,
-            COLORS.forceFriction,
-            'Friction'
-        );
+        drawForceArrow(comX, comY + 25, state.frictionForce > 0 ? length : -length, 0, COLORS.forceFriction, '');
     }
 
-    // Air Drag Force (horizontal, opposes motion) - from air (Top/Body)
+    // Air Drag Force (horizontal)
     if (Math.abs(state.airDragForce) > 0.1) {
         const length = Math.max(Math.abs(state.airDragForce) * scale, minArrowLength);
-        drawForceArrow(
-            comX, comY - 25, // Offset UP for air
-            state.airDragForce > 0 ? length : -length, 0,
-            COLORS.forceAir,
-            'Drag'
-        );
+        drawForceArrow(comX, comY - 25, state.airDragForce > 0 ? length : -length, 0, COLORS.forceAir, '');
     }
 
-    // Normal Force (upward) - from ground
+    // Normal Force (upward)
     const normalLength = Math.max(state.normalForce * scale * 0.5, minArrowLength);
-    drawForceArrow(
-        comX, comY,
-        0, -normalLength,
-        COLORS.forceNormal,
-        'Normal'
-    );
+    drawForceArrow(comX, comY, 0, -normalLength, COLORS.forceNormal, '');
 
-    // Gravity/Weight (downward) - from Earth
+    // Gravity/Weight (downward)
     const gravityLength = Math.max(state.gravityForce * scale * 0.5, minArrowLength);
-    drawForceArrow(
-        comX, comY,
-        0, gravityLength,
-        COLORS.forceGravity,
-        'Gravity'
-    );
+    drawForceArrow(comX, comY, 0, gravityLength, COLORS.forceGravity, '');
 }
 
 /**
- * Draw a force arrow with label
+ * Draw a dedicated Free Body Diagram (FBD) overlay
+ * This shows the forces in isolation with full labels
+ */
+function drawFreeBodyDiagramOverlay(state) {
+    const boxWidth = 280; // Wider to fit labels
+    const boxHeight = 240;
+    // Bottom-Left positioning (avoids sled)
+    const boxX = 20;
+    const boxY = canvasHeight - boxHeight - 20;
+    const centerX = boxX + boxWidth / 2;
+    const centerY = boxY + boxHeight / 2;
+
+    push();
+
+    // Background Panel
+    fill(COLORS.bgDark + 'E6'); // 90% opacity hex
+    stroke(COLORS.textSecondary);
+    strokeWeight(2);
+    rect(boxX, boxY, boxWidth, boxHeight, 10);
+
+    // Title removed to save space for labels
+    // noStroke();
+    // fill(COLORS.text);
+    // textSize(16);
+    // textAlign(CENTER, TOP);
+    // textStyle(BOLD);
+    // text("Free Body Diagram", centerX, boxY + 15);
+
+    // Central Object (Point Mass)
+    fill(COLORS.text);
+    noStroke();
+    ellipse(centerX, centerY, 10, 10);
+
+    // Scale for FBD (Compact)
+    const scale = 0.03;
+    const minLen = 25;
+    const maxLen = 80; // Cap length to stay in compact box
+
+    // Helper to clamp length
+    const getLen = (force) => {
+        let l = Math.abs(force) * scale;
+        return Math.min(Math.max(l, minLen), maxLen);
+    };
+
+    // --- Applied Force ---
+    if (state.appliedForce !== 0) {
+        const l = getLen(state.appliedForce);
+        const dir = Math.sign(state.appliedForce);
+        drawFBDArrow(centerX, centerY, l * dir, 0, COLORS.forceApplied, 'F applied on\nSled by Rockets', dir === 1 ? 'RIGHT' : 'LEFT');
+    }
+
+    // --- Friction ---
+    if (Math.abs(state.frictionForce) > 0.1) {
+        const l = getLen(state.frictionForce);
+        const dir = Math.sign(state.frictionForce);
+        // Increased vertical offset to separate from Drag
+        drawFBDArrow(centerX, centerY + 10, l * dir, 0, COLORS.forceFriction, 'F friction on\nSled by Track', dir === 1 ? 'RIGHT' : 'LEFT');
+    }
+
+    // --- Drag ---
+    if (Math.abs(state.airDragForce) > 0.1) {
+        const l = getLen(state.airDragForce);
+        const dir = Math.sign(state.airDragForce);
+        drawFBDArrow(centerX, centerY - 10, l * dir, 0, COLORS.forceAir, 'F air on\nSled by Air', dir === 1 ? 'RIGHT' : 'LEFT');
+    }
+
+    // --- Normal ---
+    const normLen = getLen(state.normalForce);
+
+    // Check for vertical equilibrium (Normal = Gravity)
+    const isVerticallyBalanced = Math.abs(state.normalForce - state.gravityForce) < 1;
+
+    drawFBDArrow(centerX, centerY, 0, -normLen, COLORS.forceNormal, 'F normal on\nSled by Track', 'TOP', isVerticallyBalanced);
+
+    // --- Gravity ---
+    const gravLen = getLen(state.gravityForce);
+    drawFBDArrow(centerX, centerY, 0, gravLen, COLORS.forceGravity, 'F gravity on\nSled by Earth', 'BOTTOM', isVerticallyBalanced);
+
+    pop();
+}
+
+/**
+ * specialized arrow drawer for the FBD overlay
+ * Handles complex label positioning relative to the box bounds
+ * Added congruencyMark support for balanced forces
+ */
+function drawFBDArrow(x, y, dx, dy, color, label, posHint, showCongruency = false) {
+    push();
+    stroke(color);
+    strokeWeight(4);
+    fill(color);
+
+    // Line
+    line(x, y, x + dx, y + dy);
+
+    // Congruency Mark (Tick mark)
+    if (showCongruency) {
+        push();
+        stroke(255); // White mark for high contrast
+        strokeWeight(3);
+        const midX = x + dx * 0.5;
+        const midY = y + dy * 0.5;
+
+        // Calculate perpendicular direction (tick is 10px long)
+        const tickSize = 10;
+        const len = Math.sqrt(dx * dx + dy * dy);
+
+        if (len > 0) {
+            // Perpendicular vector (-dy, dx)
+            const perpX = (-dy / len) * (tickSize / 2);
+            const perpY = (dx / len) * (tickSize / 2);
+
+            line(midX - perpX, midY - perpY, midX + perpX, midY + perpY);
+        }
+        pop();
+    }
+
+    // Arrowhead
+    const angle = atan2(dy, dx);
+    const size = 12;
+    push();
+    translate(x + dx, y + dy);
+    rotate(angle);
+    triangle(0, 0, -size, -size / 2, -size, size / 2);
+    pop();
+
+    // Label
+    noStroke();
+    fill(COLORS.text);
+    textSize(10); // Smaller font to fit in box
+    textStyle(NORMAL);
+
+    let lx = x + dx;
+    let ly = y + dy;
+
+    // Positioning logic based on hint
+    if (posHint === 'RIGHT') {
+        textAlign(LEFT, CENTER);
+        lx += 10; // Reduced offset
+    } else if (posHint === 'LEFT') {
+        textAlign(RIGHT, CENTER);
+        lx -= 10; // Reduced offset
+    } else if (posHint === 'TOP') {
+        textAlign(CENTER, BOTTOM);
+        ly -= 10; // Reduced offset
+    } else if (posHint === 'BOTTOM') {
+        textAlign(CENTER, TOP);
+        ly += 10; // Reduced offset
+    }
+
+    text(label, lx, ly);
+    pop();
+}
+
+/**
+ * Draw a force arrow (Main View - No Label Version)
  */
 function drawForceArrow(x, y, dx, dy, color, label) {
     push();
@@ -609,13 +739,13 @@ function drawForceArrow(x, y, dx, dy, color, label) {
     strokeWeight(10);
     line(x, y, x + dx, y + dy);
 
-    // Arrow line - medium thickness
+    // Arrow line
     stroke(color);
     strokeWeight(6);
     fill(color);
     line(x, y, x + dx, y + dy);
 
-    // LARGE arrowhead
+    // Arrowhead
     const angle = atan2(dy, dx);
     const arrowSize = 25;
 
@@ -627,67 +757,69 @@ function drawForceArrow(x, y, dx, dy, color, label) {
     triangle(0, 0, -arrowSize, -arrowSize / 2, -arrowSize, arrowSize / 2);
     pop();
 
-    // Label with LARGE text
-    noStroke();
-    textSize(16);
-    textAlign(CENTER);
-    textStyle(BOLD);
-
-    // Position label at arrow tip
-    let labelX = x + dx;
-    let labelY = y + dy;
-
-    if (dx !== 0) {
-        labelX += (dx > 0 ? 50 : -50);
-    }
-    if (dy !== 0) {
-        labelY += (dy > 0 ? 30 : -15);
-    }
-
-    // Draw text with black outline for visibility
-    fill(0);
-    for (let ox = -2; ox <= 2; ox++) {
-        for (let oy = -2; oy <= 2; oy++) {
-            text(label, labelX + ox, labelY + oy);
-        }
-    }
-    fill(color);
-    text(label, labelX, labelY);
+    // NO LABEL DRAWING HERE ANYMORE
 
     pop();
 }
 
 /**
  * Draw velocity indicator arrow
+ * Rendered as a "Double Arrow" (two parallel shafts) for emphasis
  */
 function drawVelocityArrow(x, y, velocity) {
     if (Math.abs(velocity) < 0.1) return;
 
     push();
 
-    const maxLength = 80;
-    const length = (velocity / 50) * maxLength; // Scale to max velocity
+    // Move higher up to avoid overlapping with Normal force
+    // x is sledScreenX, y passed is (sledScreenY - SLED_HEIGHT - 30)
+    // We want it significantly higher, say 80px higher than that
+    const arrowY = y - 80;
+
+    const maxLength = 120; // Larger max length
+    const pxPerMs = 2.4; // Scaling factor
+    const rawLength = velocity * pxPerMs;
+    // Cap length but keep direction
+    const length = (Math.abs(rawLength) > maxLength) ? (Math.sign(velocity) * maxLength) : rawLength;
 
     stroke(COLORS.primary);
-    strokeWeight(2);
-    fill(COLORS.primary);
+    noFill();
 
-    // Arrow line
-    line(x, y, x + length, y);
+    // "Double Arrow" Style -> Two parallel lines for shaft
+    const shaftSeparation = 6;
+    strokeWeight(3);
+
+    // Top shaft
+    line(x, arrowY - shaftSeparation / 2, x + length, arrowY - shaftSeparation / 2);
+    // Bottom shaft
+    line(x, arrowY + shaftSeparation / 2, x + length, arrowY + shaftSeparation / 2);
 
     // Arrowhead
-    const arrowSize = 8;
+    fill(COLORS.primary);
+    noStroke();
+    const arrowSize = 16;
     if (velocity > 0) {
-        triangle(x + length, y, x + length - arrowSize, y - arrowSize / 2, x + length - arrowSize, y + arrowSize / 2);
+        triangle(
+            x + length + 5, arrowY,
+            x + length - 5, arrowY - arrowSize,
+            x + length - 5, arrowY + arrowSize
+        );
     } else {
-        triangle(x + length, y, x + length + arrowSize, y - arrowSize / 2, x + length + arrowSize, y + arrowSize / 2);
+        triangle(
+            x + length - 5, arrowY,
+            x + length + 5, arrowY - arrowSize,
+            x + length + 5, arrowY + arrowSize
+        );
     }
 
     // Label
-    noStroke();
-    textSize(11);
+    fill(COLORS.primary);
+    stroke(0);
+    strokeWeight(2); // Text outline
+    textSize(16); // Larger font
+    textStyle(BOLD);
     textAlign(CENTER);
-    text(`v = ${velocity.toFixed(1)} m/s`, x, y - 12);
+    text(`v = ${velocity.toFixed(1)} m/s`, x, arrowY - 25);
 
     pop();
 }

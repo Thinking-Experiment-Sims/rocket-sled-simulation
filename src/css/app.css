@@ -605,7 +605,7 @@ main {
 }
 
 #canvasContainer {
-    flex: 0 0 280px;
+    flex: 0 0 400px;
     /* Fixed height! Stop growing! */
     width: 100%;
     display: flex;
