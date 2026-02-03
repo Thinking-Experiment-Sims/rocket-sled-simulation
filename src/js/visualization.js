@@ -10,6 +10,9 @@ const SLED_WIDTH = 80;
 const SLED_HEIGHT = 50;
 const WHEEL_RADIUS = 12;
 
+// Pug image
+let pugImage;
+
 // Display options - default OFF for cleaner initial view
 let showForceArrows = false;
 let showGrid = false;
@@ -43,6 +46,11 @@ const COLORS = {
     jet: '#FF5722',
     jetGlow: '#FFAB91'
 };
+
+// p5.js preload function - loads assets before setup
+function preload() {
+    pugImage = loadImage('pug.png');
+}
 
 // p5.js setup function
 function setup() {
@@ -360,71 +368,33 @@ function drawSled(x, y, state) {
     // Right Rocket (Points Right): Fires when thrust is Negative (Left)
     drawRocket(SLED_WIDTH / 2 + 10, SLED_HEIGHT / 2, 1, state.thrustDirection === -1);
 
-    // Draw Character (Penguin!)
+    // Draw Character (Pug!)
     drawPenguin(0, -5, state.thrustDirection);
 
     pop();
 }
 
 /**
- * Draw a penguin character on the sled
+ * Draw a pug character on the sled
  */
 function drawPenguin(x, y, facing) {
     push();
     translate(x, y);
 
-    // Scale down
-    scale(0.8);
+    // Check if image is loaded
+    if (pugImage) {
+        // Scale and position the pug
+        // The pug image will be sized to fit nicely on the sled
+        const pugWidth = 50;
+        const pugHeight = 50;
 
-    // Body
-    fill(255);
-    stroke(0);
-    strokeWeight(2);
-    ellipse(0, 0, 40, 50); // White belly
-
-    // Head/Back (black parts)
-    fill(30);
-    noStroke();
-    arc(0, 0, 42, 52, PI + QUARTER_PI, TWO_PI - QUARTER_PI, CHORD);
-    ellipse(0, -20, 35, 30); // Head
-
-    // Eyes
-    fill(255);
-    ellipse(-8, -22, 10, 10);
-    ellipse(8, -22, 10, 10);
-    fill(0);
-
-    // Eye direction based on thrust
-    let pupilOffset = 0;
-    if (facing === 1) pupilOffset = 2;
-    if (facing === -1) pupilOffset = -2;
-
-    ellipse(-8 + pupilOffset, -22, 3, 3);
-    ellipse(8 + pupilOffset, -22, 3, 3);
-
-    // Beak
-    fill('#FF9800');
-    triangle(-4, -15, 4, -15, 0, -10);
-
-    // Scarf (blowing in wind)
-    fill('#E91E63'); // Pink scarf
-    rect(-15, -10, 30, 8, 2);
-
-    // Scarf tail blowing opposite to motion
-    if (Math.abs(getPhysicsState().velocity) > 1) {
-        const windDir = -Math.sign(getPhysicsState().velocity);
-        const windSpeed = Math.min(Math.abs(getPhysicsState().velocity) / 2, 20);
-
-        beginShape();
-        vertex(10 * windDir, -8);
-        bezierVertex(
-            20 * windDir, -15 - windSpeed / 2,
-            30 * windDir + (sin(frameCount * 0.2) * 5), -5,
-            35 * windDir + windSpeed, -10 + (cos(frameCount * 0.2) * 5)
-        );
-        vertex(35 * windDir + windSpeed, -2);
-        vertex(10 * windDir, -2);
-        endShape(CLOSE);
+        imageMode(CENTER);
+        image(pugImage, 0, -10, pugWidth, pugHeight);
+    } else {
+        // Fallback: draw a simple placeholder if image hasn't loaded
+        fill(100);
+        noStroke();
+        ellipse(0, 0, 30, 30);
     }
 
     pop();
