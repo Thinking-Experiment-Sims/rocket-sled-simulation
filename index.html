@@ -8,7 +8,7 @@
     <meta name="description"
         content="Interactive physics simulation demonstrating Newton's Laws with a rocket sled. Explore forces, friction, and air drag effects on motion.">
     <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="src/css/app.css?v=20260202v15">
+    <link rel="stylesheet" href="src/css/app.css?v=20260202v16">
 </head>
 
 <body>
@@ -121,6 +121,13 @@
                         <span>🔄</span> Reset
                     </button>
                 </div>
+
+                <!-- Pedagogical Tools -->
+                <div class="quiz-section" style="margin-top: 20px;">
+                    <button id="quizBtn" class="btn-primary" style="width: 100%; background: #9C27B0;">
+                        <span>❓</span> Check Understanding
+                    </button>
+                </div>
             </aside>
 
             <!-- CENTER PANEL: Visualization -->
@@ -132,7 +139,53 @@
                     <button id="gridBtn" class="viz-btn">📐 Grid</button>
                 </div>
 
-                <div id="canvasContainer"></div>
+                <div id="canvasContainer">
+                    <!-- HUD Overlay -->
+                    <div class="hud-layer">
+                        <!-- Top Left: Force Values -->
+                        <div class="hud-panel hud-top-left">
+                            <div class="force-row"><span class="label applied">Push:</span> <span
+                                    id="appliedForceValue">0 N</span></div>
+                            <div class="force-row"><span class="label friction">Friction:</span> <span
+                                    id="frictionForceValue">0 N</span></div>
+                            <div class="force-row"><span class="label air">Drag:</span> <span id="airDragForceValue">0
+                                    N</span></div>
+                            <div class="force-row divider"><span class="label net">Net:</span> <span
+                                    id="netForceValue">0 N</span></div>
+                        </div>
+
+                        <!-- Top Right: Velocimeter -->
+                        <div class="hud-panel hud-top-right">
+                            <div class="velocimeter-compact">
+                                <div id="velocityDisplay" class="velocity-value">0.0 <span class="unit">m/s</span></div>
+                                <div class="velocimeter-gauge-mini">
+                                    <div id="velocimeterNeedle" class="needle"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Left: Legend -->
+                        <div class="hud-panel hud-bottom-left">
+                            <div class="legend-compact">
+                                <div class="legend-item">
+                                    <div class="dot applied"></div> Push
+                                </div>
+                                <div class="legend-item" id="legendFriction">
+                                    <div class="dot friction"></div> Friction
+                                </div>
+                                <div class="legend-item" id="legendAir">
+                                    <div class="dot air"></div> Drag
+                                </div>
+                                <div class="legend-item">
+                                    <div class="dot normal"></div> Normal
+                                </div>
+                                <div class="legend-item">
+                                    <div class="dot gravity"></div> Gravity
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Direction Slider (below the sled) -->
                 <div class="direction-control">
@@ -151,90 +204,7 @@
                 </div>
             </section>
 
-            <!-- RIGHT PANEL: Data Display -->
-            <aside class="data-section">
-                <h2>📈 Data</h2>
 
-                <!-- Force Values Display -->
-                <div class="force-values">
-                    <h3>Force Values</h3>
-                    <div class="force-value-item applied">
-                        <span class="force-label">Applied Force:</span>
-                        <span id="appliedForceValue" class="force-number">0 N</span>
-                    </div>
-                    <div class="force-value-item friction">
-                        <span class="force-label">Friction Force:</span>
-                        <span id="frictionForceValue" class="force-number">0 N</span>
-                    </div>
-                    <div class="force-value-item air">
-                        <span class="force-label">Air Drag Force:</span>
-                        <span id="airDragForceValue" class="force-number">0 N</span>
-                    </div>
-                    <div class="force-value-item net">
-                        <span class="force-label">Net Force:</span>
-                        <span id="netForceValue" class="force-number bold">0 N</span>
-                    </div>
-                </div>
-
-                <!-- Velocimeter -->
-                <div class="velocimeter">
-                    <h3>⚡ Velocimeter</h3>
-                    <div class="velocimeter-gauge">
-                        <div id="velocimeterNeedle" class="needle"></div>
-                        <div class="gauge-labels">
-                            <span class="left">-50</span>
-                            <span class="center">0</span>
-                            <span class="right">50</span>
-                        </div>
-                    </div>
-                    <div id="velocityDisplay" class="velocity-value">0.0 <span class="unit">m/s</span></div>
-                </div>
-
-                <!-- Force Legend -->
-                <div class="force-legend">
-                    <h3>Force Legend</h3>
-                    <div class="legend-items">
-                        <div class="legend-item">
-                            <div class="legend-color applied"></div>
-                            <span>F<sub>push</sub> on Sled by Rockets</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color normal"></div>
-                            <span>F<sub>normal</sub> on Sled by Ground</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color gravity"></div>
-                            <span>F<sub>gravity</sub> on Sled by Earth</span>
-                        </div>
-                        <div id="legendFriction" class="legend-item inactive">
-                            <div class="legend-color friction"></div>
-                            <span>F<sub>friction</sub> on Sled by Ground</span>
-                        </div>
-                        <div id="legendAir" class="legend-item inactive">
-                            <div class="legend-color air"></div>
-                            <span>F<sub>drag</sub> on Sled by Air</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Physics Tips -->
-                <div class="tips-section">
-                    <h3>💡 Physics Tips</h3>
-                    <ul>
-                        <li>With no friction: object in motion stays in motion!</li>
-                        <li>Friction and air drag always oppose motion</li>
-                        <li>Reversing thrust doesn't instantly reverse velocity</li>
-                        <li>Try: Get to red zone, reverse thrust, watch inertia!</li>
-                    </ul>
-                </div>
-
-                <!-- Pedagogical Tools -->
-                <div class="quiz-section" style="margin-top: 20px;">
-                    <button id="quizBtn" class="btn-primary" style="width: 100%; background: #9C27B0;">
-                        <span>❓</span> Check Understanding
-                    </button>
-                </div>
-            </aside>
         </main>
     </div>
 
@@ -328,13 +298,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
 
     <!-- Physics Engine -->
-    <script src="src/js/physics.js?v=20260202v15"></script>
+    <script src="src/js/physics.js?v=20260202v16"></script>
 
     <!-- Visualization (p5.js sketch) -->
-    <script src="src/js/visualization.js?v=20260202v15"></script>
+    <script src="src/js/visualization.js?v=20260202v16"></script>
 
     <!-- Main Application Controller -->
-    <script src="src/js/main.js?v=20260202v15"></script>
+    <script src="src/js/main.js?v=20260202v16"></script>
 </body>
 
 </html>

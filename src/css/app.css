@@ -121,11 +121,10 @@ body {
 
 main {
     display: grid;
-    grid-template-columns: 240px 1fr 240px;
-    /* Reduced from 280/300 */
+    grid-template-columns: 240px 1fr;
+    /* Removed right column */
     grid-template-rows: minmax(0, 1fr);
     gap: 8px;
-    /* Reduced from 12px */
     padding: 12px 16px;
     flex: 1;
     overflow-y: auto;
@@ -1283,4 +1282,231 @@ body.embed #canvasContainer {
    ======================================== */
 .hidden {
     display: none !important;
+}
+
+/* ========================================
+   HUD Overlay
+   ======================================== */
+.hud-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    padding: 12px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    z-index: 10;
+}
+
+.hud-panel {
+    pointer-events: auto;
+    background: rgba(13, 17, 23, 0.85);
+    /* Matches bg-panel with opacity */
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.hud-top-left {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    align-self: start;
+}
+
+.hud-top-right {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: start;
+    min-width: 140px;
+}
+
+.hud-bottom-left {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-self: center;
+    align-self: end;
+    background: rgba(13, 17, 23, 0.95);
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+    width: auto;
+    min-width: 60%;
+    margin-bottom: -1px;
+    padding: 8px 20px;
+}
+
+/* Force Values Table */
+.force-row {
+    display: flex;
+    justify-content: space-between;
+    width: 180px;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+    align-items: center;
+}
+
+.force-row .label {
+    opacity: 0.8;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.force-row .label.applied {
+    color: var(--force-applied);
+}
+
+.force-row .label.friction {
+    color: var(--force-friction);
+}
+
+.force-row .label.air {
+    color: var(--force-air);
+}
+
+.force-row .label.net {
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.force-row.divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 4px;
+    margin-top: 4px;
+}
+
+.force-number {
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 600;
+    color: white;
+}
+
+/* Compact Velocimeter */
+.velocimeter-compact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.velocity-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: 'Roboto Mono', monospace;
+    color: var(--primary);
+    margin-bottom: 6px;
+    text-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
+}
+
+.velocity-value .unit {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    font-weight: normal;
+}
+
+.velocimeter-gauge-mini {
+    width: 120px;
+    height: 60px;
+    position: relative;
+    background: linear-gradient(90deg, #ff5252 0%, #ffeb3b 50%, #4caf50 100%);
+    border-radius: 60px 60px 0 0;
+    overflow: hidden;
+    box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.3);
+}
+
+.velocimeter-gauge-mini::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    background: rgba(13, 17, 23, 0.85);
+    /* Match panel bg */
+    border-radius: 50% 50% 0 0;
+}
+
+.velocimeter-gauge-mini .needle {
+    width: 4px;
+    height: 55px;
+    background: white;
+    bottom: 0;
+    left: 50%;
+    position: absolute;
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(0deg);
+    transition: transform 0.1s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+    z-index: 2;
+    border-radius: 2px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+.velocimeter-gauge-mini .needle::before {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: -4px;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+}
+
+/* Compact Legend */
+.legend-compact {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.legend-item .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: 0 0 4px currentColor;
+}
+
+.dot.applied {
+    background: var(--force-applied);
+    color: var(--force-applied);
+}
+
+.dot.friction {
+    background: var(--force-friction);
+    color: var(--force-friction);
+}
+
+.dot.air {
+    background: var(--force-air);
+    color: var(--force-air);
+}
+
+.dot.normal {
+    background: var(--force-normal);
+    color: var(--force-normal);
+}
+
+.dot.gravity {
+    background: var(--force-gravity);
+    color: var(--force-gravity);
+}
+
+.legend-item.inactive {
+    opacity: 0.3;
+    filter: grayscale(100%);
 }

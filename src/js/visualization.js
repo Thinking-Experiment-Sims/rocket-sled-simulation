@@ -553,7 +553,7 @@ function drawForceDiagram(x, y, state) {
             comX, comY,
             state.appliedForce > 0 ? length : -length, 0,
             COLORS.forceApplied,
-            'F push on Sled by Rockets'
+            'Push'
         );
     }
 
@@ -564,7 +564,7 @@ function drawForceDiagram(x, y, state) {
             comX, comY + 25, // Offset DOWN for wheels
             state.frictionForce > 0 ? length : -length, 0,
             COLORS.forceFriction,
-            'F friction on Sled by Ground'
+            'Friction'
         );
     }
 
@@ -575,7 +575,7 @@ function drawForceDiagram(x, y, state) {
             comX, comY - 25, // Offset UP for air
             state.airDragForce > 0 ? length : -length, 0,
             COLORS.forceAir,
-            'F drag on Sled by Air'
+            'Drag'
         );
     }
 
@@ -585,7 +585,7 @@ function drawForceDiagram(x, y, state) {
         comX, comY,
         0, -normalLength,
         COLORS.forceNormal,
-        'F normal on Sled by Ground'
+        'Normal'
     );
 
     // Gravity/Weight (downward) - from Earth
@@ -594,7 +594,7 @@ function drawForceDiagram(x, y, state) {
         comX, comY,
         0, gravityLength,
         COLORS.forceGravity,
-        'F gravity on Sled by Earth'
+        'Gravity'
     );
 }
 
