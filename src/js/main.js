@@ -21,6 +21,10 @@ let velocimeterNeedle, velocityDisplay, velocimeterGauge;
 let isRunning = true;
 let lastTime = 0;
 
+// Quiz tracking and pug mode easter egg
+let quizScore = 0;
+let pugModeUnlocked = false;
+
 // Current max force setting
 let maxForce = 2000;
 
@@ -538,6 +542,9 @@ function closeModal(modal) {
 // --- Quiz Logic ---
 
 function resetQuiz() {
+    // Reset quiz score
+    quizScore = 0;
+
     // Reset all questions to initial state
     document.querySelectorAll('.quiz-question').forEach(q => {
         q.classList.remove('active');
@@ -557,6 +564,11 @@ window.checkAnswer = function (btn, isCorrect) {
     const parent = btn.closest('.quiz-question');
     const feedback = parent.querySelector('.feedback');
     const nextBtn = parent.querySelector('.next-btn');
+
+    // Track score
+    if (isCorrect) {
+        quizScore++;
+    }
 
     // Disable all options in this question
     parent.querySelectorAll('.quiz-opt').forEach(opt => {
@@ -587,5 +599,88 @@ window.nextQuestion = function (currentId) {
 };
 
 window.closeQuiz = function () {
+    // Check if all 3 questions were answered correctly
+    if (quizScore === 3 && !pugModeUnlocked) {
+        pugModeUnlocked = true;
+        showPugModeUnlocked();
+    }
     closeModal(document.getElementById('quizModal'));
+};
+
+// Show pug mode unlocked celebration
+function showPugModeUnlocked() {
+    // Create celebration overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.5s;
+    `;
+
+    const message = document.createElement('div');
+    message.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        animation: scaleIn 0.5s;
+    `;
+
+    message.innerHTML = `
+        <h2 style="font-size: 2.5em; margin: 0 0 20px 0; color: #FFD700;">🎉 Achievement Unlocked! 🎉</h2>
+        <p style="font-size: 1.3em; margin: 0 0 15px 0; color: white;">Perfect Score!</p>
+        <p style="font-size: 1.1em; margin: 0 0 25px 0; color: #e0e0e0;">
+            You've unlocked <strong>Pug Mode</strong>!<br>
+            Meet Mr. Lopez's dog riding the rocket sled! 🐶🚀
+        </p>
+        <button id="closePugModal" style="
+            background: #FFD700;
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Let's Go! 🐾</button>
+    `;
+
+    overlay.appendChild(message);
+    document.body.appendChild(overlay);
+
+    // Add animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Close button
+    document.getElementById('closePugModal').addEventListener('click', () => {
+        overlay.style.animation = 'fadeIn 0.3s reverse';
+        setTimeout(() => overlay.remove(), 300);
+    });
+}
+
+// Global function to check if pug mode is unlocked (for visualization.js)
+window.isPugModeUnlocked = function () {
+    return pugModeUnlocked;
 };
