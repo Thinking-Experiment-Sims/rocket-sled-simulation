@@ -403,6 +403,11 @@ function drawPenguin(x, y, facing) {
 
         drawingContext.restore();
         pop();
+
+        // Only log once
+        if (frameCount === 60) {
+            console.log('✅ Pug is being drawn! Size:', pugSize, 'Image dimensions:', pugImage.width, 'x', pugImage.height);
+        }
     } else {
         // Fallback: draw a simple dog placeholder if image hasn't loaded
         fill(139, 69, 19); // Brown color for dog
@@ -420,7 +425,10 @@ function drawPenguin(x, y, facing) {
         ellipse(-8, -12, 5, 5);
         ellipse(8, -12, 5, 5);
 
-        console.log('Pug image not loaded, showing placeholder');
+        // Only log once per second
+        if (frameCount % 60 === 0) {
+            console.log('❌ Pug image not loaded. pugImage:', pugImage, 'width:', pugImage ? pugImage.width : 'N/A');
+        }
     }
 
     pop();
