@@ -4,6 +4,7 @@
    ======================================== */
 
 :root {
+
   --bg-950: #e9f4fb;
   --bg-900: #fff4dd;
   --bg-800: #ffffff;
@@ -26,7 +27,7 @@
     --bg-panel: #242931;
     --text-primary: #e0e0e0;
     --text-secondary: #9e9e9e;
-    --border: #3a4149;
+    --border: #c8dbe3;
 
     /* Force colors */
     --force-applied: #FF9800;
@@ -37,7 +38,8 @@
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 12px 24px rgba(12, 54, 68, 0.12);
+
 }
 
 * {
