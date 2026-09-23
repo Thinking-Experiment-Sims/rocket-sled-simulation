@@ -1,106 +1,108 @@
 # Rocket Sled - Newton's Laws Simulation
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-2780e3?logo=githubpages&logoColor=white)](https://vladimirlopez.github.io/rocket-sled-simulation/)
+An interactive physics simulation demonstrating Newton's Laws using a rocket sled. Students explore applied thrust, friction, air drag, inertia, and their effects on motion.
 
-An interactive physics simulation demonstrating Newton's Laws using a rocket sled. Students explore force, friction, air drag, and their effects on motion.
+Part of **"The Thinking Experiment"** (PhysicsKit) curriculum collection.
 
-## 🎯 Features
+[![Live Simulation](https://img.shields.io/badge/Live_Simulation-GitHub_Pages-0f7e9b?style=for-the-badge)](https://thinking-experiment-sims.github.io/rocket-sled-simulation/)
+[![Physics Theory Guide](https://img.shields.io/badge/Physics_Guide-Deep_Theory-d67b19?style=for-the-badge)](./PHYSICS.md)
+[![Simulation Hub](https://img.shields.io/badge/Simulation_Hub-The_Thinking_Experiment-123140?style=for-the-badge)](https://thinking-experiment-sims.github.io/interactive-physics/)
 
-- **Applied Force Control**: Left/right thrust buttons with keyboard support (Arrow keys, A/D)
-- **Friction Toggle**: Enable/disable surface friction with visual feedback
-- **Air Drag Toggle**: Enable/disable air resistance with visual feedback  
-- **Real-Time Force Diagram**: Dynamic arrows showing Fapp, Fnorm, Fgrav, Ffrict, and Fair
-- **Speedometer**: Visual velocity display with "red zone" indicator
-- **Canvas LMS Ready**: Embed mode support with `?embed=1` parameter
+---
 
-## 🚀 Quick Start
+## 🎯 Educational Overview
 
-1. Open `index.html` in a modern web browser, or
-2. Run a local server:
-   ```bash
-   npx http-server . -p 8080
-   ```
-3. Visit `http://localhost:8080`
+This simulation supports the **RocketSledder** inquiry curriculum, allowing students to explore:
+1. **Newton's First Law (Inertia):** What occurs when horizontal thrust is shut off on a frictionless track ($F_{\text{net}} = 0 \implies v = \text{const}$).
+2. **Newton's Second Law ($\vec{F}_{\text{net}} = m \vec{a}$):** How varying applied rocket thrust changes instantaneous acceleration.
+3. **Deceleration & Direction Reversal:** Why reversing thrusters decelerates the vehicle to rest before reversing its spatial velocity.
+4. **Resistive Force Dynamics:** Observing how surface friction and quadratic air resistance always oppose the direction of motion ($-\text{sgn}(v)$).
 
-## 📚 Educational Use
+For full mathematical derivations, free-body diagram equations, terminal velocity formulas, and worked examples, see [PHYSICS.md](./PHYSICS.md).
 
-This simulation supports the **RocketSledder** student handout, covering:
+---
 
-1. Effect of applied force on velocity (with friction off)
-2. Motion without horizontal forces (inertia/coasting)
-3. Stopping a moving sled (reversing force)
-4. Force diagrams for multiple scenarios
-5. Resistance force behavior (friction & air drag direction)
-6. Inertia demonstration (thrust reversal doesn't instantly reverse direction)
+## 🌟 Key Features
 
-## 📱 Embed in Canvas LMS
+- **Applied Force Control**: Left/right thrust buttons with keyboard support (Arrow keys, A/D, Space to cut thrust).
+- **Surface Friction Toggle**: Enable/disable surface friction with dynamic vector readout.
+- **Air Drag Toggle**: Enable/disable quadratic air resistance to observe terminal velocity.
+- **Real-Time Force Vector Diagram**: Dynamic arrows showing $F_{\text{app}}$, $F_{\text{norm}}$, $F_{\text{grav}}$, $F_{\text{frict}}$, and $F_{\text{air}}$.
+- **Analog & Digital Speedometer**: Visual speedometer with redline zone indicator.
+- **Canvas LMS Ready**: Embed mode support with clean container layout.
 
-```html
-<iframe
-    src="https://vladimirlopez.github.io/rocket-sled-simulation/index.html?embed=1"
-    width="100%"
-    height="700"
-    style="border:0;"
-    loading="lazy"
-    allowfullscreen
-></iframe>
-```
+---
+
+## 🎨 Design System Compliance
+
+This simulation adheres strictly to **The Thinking Experiment** brand standards:
+- **Teal Headers / Primary:** `#0f7e9b` / `#095f76`
+- **Amber Accents / Highlights:** `#d67b19`
+- **Background:** Pure White (`#ffffff`) with Blueprint Grid (`#e9f4fb`)
+- **Typography:** Sans-serif (`Inter`, `IBM Plex Sans`)
+- **Prohibited:** No Purple (`#59118e`) or Gold (`#ffc61e`)
+
+---
 
 ## 🎮 Keyboard Controls
 
 | Key | Action |
-|-----|--------|
-| ← / A | Apply leftward force |
-| → / D | Apply rightward force |
-| Space | Turn off thrust |
-| R | Reset simulation |
+|:---|:---|
+| `←` / `A` | Apply leftward thrust |
+| `→` / `D` | Apply rightward thrust |
+| `Space` | Turn off rocket thrust (coast) |
+| `R` | Reset simulation to origin |
 
-## 📁 File Structure
+---
+
+## 🚀 Running Locally
+
+```bash
+# Clone the repository
+git clone https://github.com/Thinking-Experiment-Sims/rocket-sled-simulation.git
+cd rocket-sled-simulation
+
+# Start local server
+python3 -m http.server 8000
+```
+Open [http://localhost:8000](http://localhost:8000) in your web browser.
+
+---
+
+## 📱 Embedding in Canvas LMS
+
+```html
+<iframe 
+  src="https://thinking-experiment-sims.github.io/rocket-sled-simulation/" 
+  width="100%" 
+  height="750" 
+  style="border: 1px solid #c8dbe3; border-radius: 8px;"
+  loading="lazy"
+  allowfullscreen>
+</iframe>
+```
+
+---
+
+## 📁 Repository Structure
 
 ```
-Rocket Sled/
-├── index.html              # Main HTML file
-├── README.md               # This file
-├── LICENSE                 # MIT License
-├── RocketSledder.pdf       # Student handout
-├── .nojekyll               # GitHub Pages configuration
-├── .github/
-│   └── workflows/
-│       └── deploy.yml      # GitHub Actions deployment
-└── src/
-    ├── css/
-    │   └── app.css         # Styling
-    └── js/
-        ├── physics.js      # Newton's Laws calculations
-        ├── visualization.js # p5.js rendering
-        └── main.js         # Application controller
+rocket-sled-simulation/
+├── index.html              # Main HTML user interface
+├── styles.css              # The Thinking Experiment styling
+├── RocketSledder.pdf       # Student inquiry handout
+├── src/
+│   └── js/
+│       ├── main.js         # Application controller and keyboard input
+│       ├── physics.js      # Newton's Laws and resistive forces calculations
+│       └── visualization.js# Canvas rendering and vector overlays
+├── PHYSICS.md              # Comprehensive theoretical physics guide
+└── README.md               # Project documentation
 ```
 
-## 🚀 Deployment
+---
 
-This site is automatically deployed to GitHub Pages via GitHub Actions.
+## 📄 License & Attribution
 
-### Automatic Deployment
-
-- **Trigger**: Every push to the `main` branch
-- **Workflow**: `.github/workflows/deploy.yml`
-- **URL**: https://vladimirlopez.github.io/rocket-sled-simulation/
-
-### Manual Deployment
-
-You can manually trigger a deployment from the GitHub Actions tab by running the "Deploy to GitHub Pages" workflow.
-
-### Requirements
-
-- GitHub Pages must be enabled in repository settings
-- Pages source should be set to "GitHub Actions"
-
-## 📄 License
-
-MIT License - Copyright (c) 2025 Vladimir Lopez
-
-## 🙏 Acknowledgments
-
-- Inspired by [The Physics Classroom](https://www.physicsclassroom.com/) Rocket Sled Interactive
-- Visualization powered by [p5.js](https://p5js.org/)
-- Design patterns from the Projectile Motion Simulator
+Authored by **Vladimir Lopez** for **The Thinking Experiment (PhysicsKit)**.  
+Open-source under the MIT License for educational use in physics classrooms worldwide.
