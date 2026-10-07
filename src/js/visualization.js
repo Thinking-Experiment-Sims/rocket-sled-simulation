@@ -399,6 +399,11 @@ function drawPug(x, y, facing) {
     push();
     translate(x, y);
 
+    // Flip horizontally when thrusting left
+    if (facing === -1) {
+        scale(-1, 1);
+    }
+
     // Check if image is loaded
     if (pugImage && pugImage.width > 0) {
         // Scale and position the pug
@@ -917,4 +922,28 @@ function toggleForceArrows(show) {
  */
 function toggleGrid(show) {
     showGrid = show;
+}
+
+/**
+ * Handle mouse clicks on canvas (e.g., clicking on the sled pilot)
+ */
+function mouseClicked() {
+    if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) return;
+
+    const centerX = canvasWidth / 2;
+    const trackY = canvasHeight * TRACK_Y_RATIO;
+    const sledY = trackY - SLED_HEIGHT / 2 - 4;
+
+    // Check if clicked near the pilot on top of the sled
+    const d = dist(mouseX, mouseY, centerX, sledY - 15);
+    if (d < 45) {
+        if (typeof window.toggleCocoPilot === 'function' && typeof window.isPugUnlockedEver === 'function' && window.isPugUnlockedEver()) {
+            window.toggleCocoPilot();
+        } else {
+            const quizBtn = document.getElementById('quizBtn');
+            if (quizBtn) {
+                quizBtn.click();
+            }
+        }
+    }
 }

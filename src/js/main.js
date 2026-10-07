@@ -24,6 +24,13 @@ let lastTime = 0;
 // Quiz tracking and pug mode easter egg
 let quizScore = 0;
 let pugModeUnlocked = false;
+let pugModeActive = true;
+
+try {
+    pugModeUnlocked = localStorage.getItem('rocket_sled_coco_unlocked') === 'true';
+} catch (e) {
+    pugModeUnlocked = false;
+}
 
 // Current max force setting
 let maxForce = 2000;
@@ -36,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     checkEmbedMode();
     setupModals();
+    updateCocoToggleUI();
 
     // Start the physics loop
     lastTime = performance.now();
@@ -202,7 +210,12 @@ function setupEventListeners() {
         });
     });
 
-
+    // Coco Pilot Toggle Button
+    const cocoBtn = document.getElementById('cocoToggleBtn');
+    cocoBtn?.addEventListener('click', () => {
+        pugModeActive = !pugModeActive;
+        updateCocoToggleUI();
+    });
 }
 
 /**
@@ -263,6 +276,14 @@ function handleKeyDown(e) {
         case 'r':
         case 'R':
             handleReset();
+            break;
+        case 'c':
+        case 'C':
+            // Teacher shortcut to toggle Coco easter egg pilot
+            pugModeUnlocked = true;
+            pugModeActive = !pugModeActive;
+            try { localStorage.setItem('rocket_sled_coco_unlocked', 'true'); } catch (err) {}
+            updateCocoToggleUI();
             break;
     }
 }
@@ -545,11 +566,19 @@ function resetQuiz() {
     // Reset quiz score
     quizScore = 0;
 
+    // Hide any previous result summary
+    const resultView = document.getElementById('quizResultView');
+    if (resultView) {
+        resultView.style.display = 'none';
+    }
+
     // Reset all questions to initial state
     document.querySelectorAll('.quiz-question').forEach(q => {
         q.classList.remove('active');
-        q.querySelector('.feedback').innerHTML = '';
-        q.querySelector('.next-btn').classList.add('hidden');
+        const feedback = q.querySelector('.feedback');
+        if (feedback) feedback.innerHTML = '';
+        const nextBtn = q.querySelector('.next-btn');
+        if (nextBtn) nextBtn.classList.add('hidden');
         q.querySelectorAll('.quiz-opt').forEach(opt => {
             opt.classList.remove('correct', 'incorrect');
             opt.style.pointerEvents = 'auto'; // Re-enable clicks
@@ -576,10 +605,10 @@ window.checkAnswer = function (btn, isCorrect) {
         if (opt === btn) {
             if (isCorrect) {
                 opt.classList.add('correct');
-                feedback.innerHTML = '<span style="color: #4CAF50">✅ Correct!</span>';
+                feedback.innerHTML = '<span style="color: #2e7d32">✅ Correct!</span>';
             } else {
                 opt.classList.add('incorrect');
-                feedback.innerHTML = '<span style="color: #F44336">❌ Try again! (Reset quiz to retry)</span>';
+                feedback.innerHTML = '<span style="color: #c62828">❌ Incorrect. Review Newton\'s Laws and try again!</span>';
             }
         }
     });
@@ -599,88 +628,168 @@ window.nextQuestion = function (currentId) {
 };
 
 window.closeQuiz = function () {
-    // Check if all 3 questions were answered correctly
-    if (quizScore === 3 && !pugModeUnlocked) {
+    const quizModal = document.getElementById('quizModal');
+    if (quizScore === 3) {
         pugModeUnlocked = true;
+        pugModeActive = true;
+        try {
+            localStorage.setItem('rocket_sled_coco_unlocked', 'true');
+        } catch (e) {}
+        updateCocoToggleUI();
+        closeModal(quizModal);
         showPugModeUnlocked();
+    } else {
+        showQuizScoreFeedback(quizScore);
     }
-    closeModal(document.getElementById('quizModal'));
 };
 
-// Show pug mode unlocked celebration
+// Show score feedback view when quiz finishes without a perfect score
+function showQuizScoreFeedback(score) {
+    const quizContainer = document.getElementById('quizContainer');
+    if (!quizContainer) {
+        closeModal(document.getElementById('quizModal'));
+        return;
+    }
+
+    let resultView = document.getElementById('quizResultView');
+    if (!resultView) {
+        resultView = document.createElement('div');
+        resultView.id = 'quizResultView';
+        resultView.className = 'quiz-result-view';
+        quizContainer.appendChild(resultView);
+    }
+
+    document.querySelectorAll('.quiz-question').forEach(q => q.classList.remove('active'));
+    resultView.style.display = 'block';
+    resultView.innerHTML = `
+        <div style="text-align: center; padding: 15px 0;">
+            <div style="font-size: 2.8rem; margin-bottom: 10px;">📊</div>
+            <h3 style="color: #0f7e9b; margin-bottom: 10px; font-size: 1.35rem; font-weight: 700;">Knowledge Check Complete</h3>
+            <p style="font-size: 1.15rem; color: #123140; margin-bottom: 8px;">
+                You scored <strong>${score} out of 3</strong>
+            </p>
+            <p style="color: #4b6570; font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px; max-width: 440px; margin-left: auto; margin-right: auto;">
+                ${score === 2 ? 'Almost there! Score a perfect 3 out of 3 to unlock Mr. Lopez\'s secret rocket sled pilot! 🐾' : 'Review Newton\'s Laws and retry to score 3 out of 3 to unlock the secret pilot! 🐾'}
+            </p>
+            <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                <button type="button" class="next-btn" style="float: none;" onclick="resetQuiz()">Retry Quiz 🔄</button>
+                <button type="button" class="header-btn" style="background: #e9f4fb; color: #123140; border: 1px solid #c8dbe3;" onclick="closeModal(document.getElementById('quizModal'))">Close</button>
+            </div>
+        </div>
+    `;
+}
+
+// Update the Coco pilot toggle UI in header
+function updateCocoToggleUI() {
+    const cocoBtn = document.getElementById('cocoToggleBtn');
+    if (!cocoBtn) return;
+    if (pugModeUnlocked) {
+        cocoBtn.classList.remove('hidden');
+        if (pugModeActive) {
+            cocoBtn.textContent = '🐶 Pilot: Coco';
+            cocoBtn.title = 'Coco is piloting! Click to switch to Penguin';
+            cocoBtn.style.borderColor = '#d67b19';
+            cocoBtn.style.color = '#d67b19';
+            cocoBtn.style.background = '#fff4dd';
+        } else {
+            cocoBtn.textContent = '🐧 Pilot: Penguin';
+            cocoBtn.title = 'Penguin is piloting! Click to switch to Coco';
+            cocoBtn.style.borderColor = '#0f7e9b';
+            cocoBtn.style.color = '#0f7e9b';
+            cocoBtn.style.background = '#e9f4fb';
+        }
+    } else {
+        cocoBtn.classList.add('hidden');
+    }
+}
+
+// Show Coco mode unlocked celebration (Light Mode & Brand Compliant)
 function showPugModeUnlocked() {
+    // Remove existing celebration if open
+    const existing = document.getElementById('cocoCelebrationOverlay');
+    if (existing) existing.remove();
+
     // Create celebration overlay
     const overlay = document.createElement('div');
+    overlay.id = 'cocoCelebrationOverlay';
     overlay.style.cssText = `
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.9);
+        background: rgba(15, 30, 45, 0.55);
+        backdrop-filter: blur(6px);
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 10000;
-        animation: fadeIn 0.5s;
+        animation: fadeIn 0.35s ease;
     `;
 
     const message = document.createElement('div');
     message.style.cssText = `
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 40px;
-        border-radius: 20px;
+        background: #ffffff;
+        border: 2px solid #c8dbe3;
+        padding: 36px 32px;
+        border-radius: 16px;
         text-align: center;
-        max-width: 500px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        animation: scaleIn 0.5s;
+        max-width: 480px;
+        box-shadow: 0 20px 50px rgba(12, 54, 68, 0.2);
+        animation: scaleIn 0.35s ease;
+        color: #123140;
     `;
 
     message.innerHTML = `
-        <h2 style="font-size: 2.5em; margin: 0 0 20px 0; color: #FFD700;">🎉 Achievement Unlocked! 🎉</h2>
-        <p style="font-size: 1.3em; margin: 0 0 15px 0; color: white;">Perfect Score!</p>
-        <p style="font-size: 1.1em; margin: 0 0 25px 0; color: #e0e0e0;">
-            You've unlocked <strong>Pug Mode</strong>!<br>
-            Meet Mr. Lopez's dog riding the rocket sled! 🐶🚀
+        <div style="font-size: 3.5rem; margin-bottom: 8px;">🐶🚀</div>
+        <h2 style="font-size: 1.8rem; margin: 0 0 8px 0; color: #0f7e9b; font-weight: 700;">Achievement Unlocked!</h2>
+        <div style="display: inline-block; background: #e9f4fb; color: #0f7e9b; padding: 4px 14px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; margin-bottom: 14px; border: 1px solid #c8dbe3; letter-spacing: 0.05em; text-transform: uppercase;">
+            Perfect Score: 3 / 3
+        </div>
+        <p style="font-size: 1.25rem; font-weight: 700; margin: 0 0 10px 0; color: #d67b19;">
+            🎉 Coco Mode Unlocked! 🎉
+        </p>
+        <p style="font-size: 1rem; line-height: 1.55; margin: 0 0 24px 0; color: #4b6570;">
+            Meet <strong>Coco</strong>, Mr. Lopez's pug! Coco has taken the pilot seat and is now riding the rocket sled!
         </p>
         <button id="closePugModal" style="
-            background: #FFD700;
-            color: #000;
+            background: #d67b19;
+            color: #ffffff;
             border: none;
-            padding: 15px 40px;
-            font-size: 1.1em;
-            border-radius: 10px;
+            padding: 12px 36px;
+            font-size: 1.05rem;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s;
-        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">Let's Go! 🐾</button>
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(214, 123, 25, 0.3);
+            transition: all 0.2s ease;
+        " onmouseover="this.style.background='#b86510'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#d67b19'; this.style.transform='translateY(0)'">Let's Ride with Coco! 🐾</button>
     `;
 
     overlay.appendChild(message);
     document.body.appendChild(overlay);
 
-    // Add animations
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes scaleIn {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-    `;
-    document.head.appendChild(style);
-
     // Close button
     document.getElementById('closePugModal').addEventListener('click', () => {
-        overlay.style.animation = 'fadeIn 0.3s reverse';
-        setTimeout(() => overlay.remove(), 300);
+        overlay.style.animation = 'fadeIn 0.25s reverse ease';
+        setTimeout(() => overlay.remove(), 250);
     });
 }
 
-// Global function to check if pug mode is unlocked (for visualization.js)
+// Global functions for visualization.js and external controls
 window.isPugModeUnlocked = function () {
+    return pugModeUnlocked && pugModeActive;
+};
+
+window.isPugUnlockedEver = function () {
     return pugModeUnlocked;
+};
+
+window.toggleCocoPilot = function () {
+    if (pugModeUnlocked) {
+        pugModeActive = !pugModeActive;
+        updateCocoToggleUI();
+        return true;
+    }
+    return false;
 };
