@@ -11,8 +11,9 @@ const SLED_WIDTH = 84;
 const SLED_HEIGHT = 48;
 const WHEEL_RADIUS = 12;
 
-// Character asset
+// Character assets
 let cocoImage;
+let brownieImage;
 
 // Display options - default OFF for cleaner initial view
 let showForceArrows = false;
@@ -52,13 +53,17 @@ const COLORS = {
 
 // p5.js preload function - loads assets before setup
 function preload() {
-    console.log('Attempting to load Coco image...');
+    console.log('Loading character assets...');
     cocoImage = loadImage('coco.png',
-        () => console.log('Coco image loaded successfully!'),
+        () => console.log('Coco (pug) image loaded successfully!'),
         (err) => {
-            console.log('Falling back to pug.png...');
+            console.log('Falling back to pug.png for Coco...');
             cocoImage = loadImage('pug.png');
         }
+    );
+    brownieImage = loadImage('brownie.png',
+        () => console.log('Brownie image loaded successfully!'),
+        (err) => console.error('Failed to load Brownie image:', err)
     );
 }
 
@@ -451,9 +456,11 @@ function drawSled(x, y, state) {
  * Draw active pilot character on the sled
  */
 function drawCharacter(x, y, facing, state) {
-    const usePug = typeof window.isPugModeUnlocked === 'function' && window.isPugModeUnlocked();
+    const activePilot = typeof window.getActivePilot === 'function' ? window.getActivePilot() : 'penguin';
 
-    if (usePug) {
+    if (activePilot === 'brownie') {
+        drawBrownie(x, y, facing, state);
+    } else if (activePilot === 'coco') {
         drawCoco(x, y, facing, state);
     } else {
         drawPenguin(x, y, facing, state);
@@ -461,7 +468,44 @@ function drawCharacter(x, y, facing, state) {
 }
 
 /**
- * Draw Coco the dog riding the sled
+ * Draw Brownie the dog riding the sled (Mr. Lopez's dog)
+ */
+function drawBrownie(x, y, facing, state) {
+    push();
+    translate(x, y);
+
+    const v = state ? state.velocity : 0;
+    const isMoving = Math.abs(v) > 0.5;
+    const bob = isMoving ? Math.sin(frameCount * 0.3) * Math.min(Math.abs(v) * 0.08, 2.5) : 0;
+
+    // brownie.png naturally faces LEFT.
+    // When thrusting/moving right, flip horizontally so Brownie faces right!
+    if (facing === 1 || (facing === 0 && v >= 0)) {
+        scale(-1, 1);
+    }
+
+    if (brownieImage && brownieImage.width > 0) {
+        const brownieW = 74;
+        const brownieH = brownieW / 1.475; // ~50px natural aspect ratio
+
+        imageMode(CENTER);
+        image(brownieImage, 0, -brownieH / 2 + 6 + bob, brownieW, brownieH);
+    } else {
+        // Fallback vector representation
+        fill(140, 120, 110);
+        noStroke();
+        ellipse(0, -16 + bob, 36, 36);
+        fill(40);
+        ellipse(-8, -17 + bob, 5, 5);
+        fill('#0f7e9b'); // Teal collar
+        rect(-14, -6 + bob, 28, 6, 2);
+    }
+
+    pop();
+}
+
+/**
+ * Draw Coco the pug riding the sled (The classic pug)
  */
 function drawCoco(x, y, facing, state) {
     push();
@@ -478,19 +522,19 @@ function drawCoco(x, y, facing, state) {
     }
 
     if (cocoImage && cocoImage.width > 0) {
-        const cocoW = 74;
-        const cocoH = cocoW / 1.475; // ~50px natural aspect ratio
+        const cocoH = 56;
+        const cocoW = cocoH * (606 / 1024); // ~33px natural aspect ratio
 
         imageMode(CENTER);
-        image(cocoImage, 0, -cocoH / 2 + 6 + bob, cocoW, cocoH);
+        image(cocoImage, 0, -cocoH / 2 + 5 + bob, cocoW, cocoH);
     } else {
         // Fallback vector representation
-        fill(140, 120, 110);
+        fill(210, 180, 140);
         noStroke();
-        ellipse(0, -16 + bob, 36, 36);
+        ellipse(0, -16 + bob, 36, 34);
         fill(40);
         ellipse(-8, -17 + bob, 5, 5);
-        fill('#0f7e9b'); // Teal collar
+        fill('#d67b19'); // Amber collar
         rect(-14, -6 + bob, 28, 6, 2);
     }
 

@@ -21,15 +21,21 @@ let velocimeterNeedle, velocityDisplay, velocimeterGauge;
 let isRunning = true;
 let lastTime = 0;
 
-// Quiz tracking and pug mode easter egg
+// Quiz tracking and multi-pilot easter egg (Brownie, Coco, Penguin)
 let quizScore = 0;
-let pugModeUnlocked = false;
-let pugModeActive = true;
+let easterEggUnlocked = false;
+let currentPilot = 'brownie'; // 'brownie' | 'coco' | 'penguin'
 
 try {
-    pugModeUnlocked = localStorage.getItem('rocket_sled_coco_unlocked') === 'true';
+    easterEggUnlocked = localStorage.getItem('rocket_sled_easter_egg_unlocked') === 'true' ||
+                        localStorage.getItem('rocket_sled_coco_unlocked') === 'true';
+    const savedPilot = localStorage.getItem('rocket_sled_pilot');
+    if (savedPilot && ['brownie', 'coco', 'penguin'].includes(savedPilot)) {
+        currentPilot = savedPilot;
+    }
 } catch (e) {
-    pugModeUnlocked = false;
+    easterEggUnlocked = false;
+    currentPilot = 'brownie';
 }
 
 // Current max force setting
@@ -43,7 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     checkEmbedMode();
     setupModals();
-    updateCocoToggleUI();
+    setupPilotMenu();
+    updatePilotUI();
 
     // Start the physics loop
     lastTime = performance.now();
@@ -210,11 +217,16 @@ function setupEventListeners() {
         });
     });
 
-    // Coco Pilot Toggle Button
-    const cocoBtn = document.getElementById('cocoToggleBtn');
-    cocoBtn?.addEventListener('click', () => {
-        pugModeActive = !pugModeActive;
-        updateCocoToggleUI();
+    // Pilot Menu Button
+    const pilotBtn = document.getElementById('pilotMenuBtn') || document.getElementById('cocoToggleBtn');
+    pilotBtn?.addEventListener('click', (e) => {
+        // If clicking directly on a single button (not dropdown arrow), cycle or toggle menu
+        const dropdown = document.getElementById('pilotDropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('show');
+        } else {
+            cyclePilot();
+        }
     });
 }
 
@@ -279,11 +291,12 @@ function handleKeyDown(e) {
             break;
         case 'c':
         case 'C':
-            // Teacher shortcut to toggle Coco easter egg pilot
-            pugModeUnlocked = true;
-            pugModeActive = !pugModeActive;
-            try { localStorage.setItem('rocket_sled_coco_unlocked', 'true'); } catch (err) {}
-            updateCocoToggleUI();
+        case 'b':
+        case 'B':
+            // Teacher shortcut to toggle/cycle secret easter egg pilots
+            easterEggUnlocked = true;
+            try { localStorage.setItem('rocket_sled_easter_egg_unlocked', 'true'); } catch (err) {}
+            cyclePilot();
             break;
     }
 }
@@ -630,14 +643,13 @@ window.nextQuestion = function (currentId) {
 window.closeQuiz = function () {
     const quizModal = document.getElementById('quizModal');
     if (quizScore === 3) {
-        pugModeUnlocked = true;
-        pugModeActive = true;
+        easterEggUnlocked = true;
         try {
-            localStorage.setItem('rocket_sled_coco_unlocked', 'true');
+            localStorage.setItem('rocket_sled_easter_egg_unlocked', 'true');
         } catch (e) {}
-        updateCocoToggleUI();
+        updatePilotUI();
         closeModal(quizModal);
-        showPugModeUnlocked();
+        showEasterEggModal();
     } else {
         showQuizScoreFeedback(quizScore);
     }
@@ -669,7 +681,7 @@ function showQuizScoreFeedback(score) {
                 You scored <strong>${score} out of 3</strong>
             </p>
             <p style="color: #4b6570; font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px; max-width: 440px; margin-left: auto; margin-right: auto;">
-                ${score === 2 ? 'Almost there! Score a perfect 3 out of 3 to unlock Mr. Lopez\'s secret rocket sled pilot! 🐾' : 'Review Newton\'s Laws and retry to score 3 out of 3 to unlock the secret pilot! 🐾'}
+                ${score === 2 ? 'Almost there! Score a perfect 3 out of 3 to unlock Mr. Lopez\'s secret rocket sled pilots! 🐾' : 'Review Newton\'s Laws and retry to score 3 out of 3 to unlock the secret pilots! 🐾'}
             </p>
             <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
                 <button type="button" class="next-btn" style="float: none;" onclick="resetQuiz()">Retry Quiz 🔄</button>
@@ -679,39 +691,93 @@ function showQuizScoreFeedback(score) {
     `;
 }
 
-// Update the Coco pilot toggle UI in header
-function updateCocoToggleUI() {
-    const cocoBtn = document.getElementById('cocoToggleBtn');
-    if (!cocoBtn) return;
-    if (pugModeUnlocked) {
-        cocoBtn.classList.remove('hidden');
-        if (pugModeActive) {
-            cocoBtn.textContent = '🐶 Pilot: Coco';
-            cocoBtn.title = 'Coco is piloting! Click to switch to Penguin';
-            cocoBtn.style.borderColor = '#d67b19';
-            cocoBtn.style.color = '#d67b19';
-            cocoBtn.style.background = '#fff4dd';
-        } else {
-            cocoBtn.textContent = '🐧 Pilot: Penguin';
-            cocoBtn.title = 'Penguin is piloting! Click to switch to Coco';
-            cocoBtn.style.borderColor = '#0f7e9b';
-            cocoBtn.style.color = '#0f7e9b';
-            cocoBtn.style.background = '#e9f4fb';
+// Setup the Pilot dropdown menu events
+function setupPilotMenu() {
+    const menuBtn = document.getElementById('pilotMenuBtn');
+    const dropdown = document.getElementById('pilotDropdown');
+    const selectBtns = document.querySelectorAll('.pilot-select-btn');
+
+    menuBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown?.classList.toggle('show');
+    });
+
+    selectBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const pilot = btn.getAttribute('data-pilot');
+            if (pilot) {
+                selectPilot(pilot);
+                dropdown?.classList.remove('show');
+            }
+        });
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#pilotMenuContainer')) {
+            dropdown?.classList.remove('show');
         }
+    });
+}
+
+// Update the Pilot UI in the header
+function updatePilotUI() {
+    const container = document.getElementById('pilotMenuContainer');
+    const label = document.getElementById('activePilotLabel');
+    const selectBtns = document.querySelectorAll('.pilot-select-btn');
+
+    if (!container) return;
+
+    if (easterEggUnlocked) {
+        container.classList.remove('hidden');
+        if (label) {
+            if (currentPilot === 'brownie') {
+                label.innerHTML = '🐕 Pilot: Brownie';
+            } else if (currentPilot === 'coco') {
+                label.innerHTML = '🐶 Pilot: Coco';
+            } else {
+                label.innerHTML = '🐧 Pilot: Penguin';
+            }
+        }
+
+        selectBtns.forEach(btn => {
+            if (btn.getAttribute('data-pilot') === currentPilot) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
     } else {
-        cocoBtn.classList.add('hidden');
+        container.classList.add('hidden');
     }
 }
 
-// Show Coco mode unlocked celebration (Light Mode & Brand Compliant)
-function showPugModeUnlocked() {
-    // Remove existing celebration if open
-    const existing = document.getElementById('cocoCelebrationOverlay');
+// Select a specific pilot
+function selectPilot(pilot) {
+    if (!['brownie', 'coco', 'penguin'].includes(pilot)) return;
+    currentPilot = pilot;
+    try {
+        localStorage.setItem('rocket_sled_pilot', pilot);
+        localStorage.setItem('rocket_sled_easter_egg_unlocked', 'true');
+    } catch (e) {}
+    updatePilotUI();
+}
+
+// Cycle through available pilots
+function cyclePilot() {
+    const order = ['brownie', 'coco', 'penguin'];
+    const nextIdx = (order.indexOf(currentPilot) + 1) % order.length;
+    selectPilot(order[nextIdx]);
+}
+
+// Show multi-pilot easter egg modal on perfect quiz score
+function showEasterEggModal() {
+    const existing = document.getElementById('easterEggOverlay');
     if (existing) existing.remove();
 
-    // Create celebration overlay
     const overlay = document.createElement('div');
-    overlay.id = 'cocoCelebrationOverlay';
+    overlay.id = 'easterEggOverlay';
     overlay.style.cssText = `
         position: fixed;
         top: 0;
@@ -727,68 +793,90 @@ function showPugModeUnlocked() {
         animation: fadeIn 0.35s ease;
     `;
 
-    const message = document.createElement('div');
-    message.style.cssText = `
+    const modal = document.createElement('div');
+    modal.style.cssText = `
         background: #ffffff;
         border: 2px solid #c8dbe3;
-        padding: 36px 32px;
+        padding: 32px 28px;
         border-radius: 16px;
         text-align: center;
-        max-width: 480px;
+        max-width: 580px;
+        width: calc(100% - 32px);
         box-shadow: 0 20px 50px rgba(12, 54, 68, 0.2);
         animation: scaleIn 0.35s ease;
         color: #123140;
     `;
 
-    message.innerHTML = `
-        <div style="font-size: 3.5rem; margin-bottom: 8px;">🐶🚀</div>
-        <h2 style="font-size: 1.8rem; margin: 0 0 8px 0; color: #0f7e9b; font-weight: 700;">Achievement Unlocked!</h2>
-        <div style="display: inline-block; background: #e9f4fb; color: #0f7e9b; padding: 4px 14px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; margin-bottom: 14px; border: 1px solid #c8dbe3; letter-spacing: 0.05em; text-transform: uppercase;">
+    modal.innerHTML = `
+        <div style="font-size: 3.2rem; margin-bottom: 6px;">🚀🐾</div>
+        <h2 style="font-size: 1.7rem; margin: 0 0 6px 0; color: #0f7e9b; font-weight: 700;">Secret Easter Egg Unlocked!</h2>
+        <div style="display: inline-block; background: #e9f4fb; color: #0f7e9b; padding: 4px 14px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; margin-bottom: 12px; border: 1px solid #c8dbe3; letter-spacing: 0.05em; text-transform: uppercase;">
             Perfect Score: 3 / 3
         </div>
-        <p style="font-size: 1.25rem; font-weight: 700; margin: 0 0 10px 0; color: #d67b19;">
-            🎉 Coco Mode Unlocked! 🎉
+        <p style="font-size: 1.05rem; line-height: 1.5; margin: 0 0 18px 0; color: #4b6570;">
+            Newton would be proud! You earned the right to choose who pilots the rocket sled. Select your pilot:
         </p>
-        <p style="font-size: 1rem; line-height: 1.55; margin: 0 0 24px 0; color: #4b6570;">
-            Meet <strong>Coco</strong>, Mr. Lopez's dog! Coco has taken the pilot seat and is now riding the rocket sled!
+
+        <div class="easter-egg-grid">
+            <div class="pilot-choice-card ${currentPilot === 'brownie' ? 'selected' : ''}" onclick="window.choosePilotAndClose('brownie')">
+                <img src="brownie.png" alt="Brownie" class="pilot-choice-avatar">
+                <div class="pilot-choice-name">🐕 Brownie</div>
+                <div class="pilot-choice-desc">Mr. Lopez's dog &bull; High-speed pup</div>
+                <button type="button" class="pilot-choice-btn">Ride with Brownie</button>
+            </div>
+            <div class="pilot-choice-card ${currentPilot === 'coco' ? 'selected' : ''}" onclick="window.choosePilotAndClose('coco')">
+                <img src="coco.png" alt="Coco" class="pilot-choice-avatar">
+                <div class="pilot-choice-name">🐶 Coco</div>
+                <div class="pilot-choice-desc">The classic pug &bull; Veteran pilot</div>
+                <button type="button" class="pilot-choice-btn">Ride with Coco</button>
+            </div>
+            <div class="pilot-choice-card ${currentPilot === 'penguin' ? 'selected' : ''}" onclick="window.choosePilotAndClose('penguin')">
+                <div class="pilot-choice-avatar-icon">🐧</div>
+                <div class="pilot-choice-name">🐧 Penguin</div>
+                <div class="pilot-choice-desc">Aviator ace &bull; Original sled pilot</div>
+                <button type="button" class="pilot-choice-btn" style="background: #0f7e9b; border-color: #0f7e9b;">Ride with Penguin</button>
+            </div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: #94a3b8; margin: 0;">
+            Tip: You can change pilots anytime with the <strong>Pilot</strong> menu in the top header.
         </p>
-        <button id="closePugModal" style="
-            background: #d67b19;
-            color: #ffffff;
-            border: none;
-            padding: 12px 36px;
-            font-size: 1.05rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(214, 123, 25, 0.3);
-            transition: all 0.2s ease;
-        " onmouseover="this.style.background='#b86510'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#d67b19'; this.style.transform='translateY(0)'">Let's Ride with Coco! 🐾</button>
     `;
 
-    overlay.appendChild(message);
+    overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
-    // Close button
-    document.getElementById('closePugModal').addEventListener('click', () => {
-        overlay.style.animation = 'fadeIn 0.25s reverse ease';
-        setTimeout(() => overlay.remove(), 250);
-    });
+    window.choosePilotAndClose = function(pilot) {
+        selectPilot(pilot);
+        overlay.style.animation = 'fadeIn 0.2s reverse ease';
+        setTimeout(() => overlay.remove(), 200);
+    };
 }
 
 // Global functions for visualization.js and external controls
+window.getActivePilot = function () {
+    return easterEggUnlocked ? currentPilot : 'penguin';
+};
+
+window.isEasterEggUnlocked = function () {
+    return easterEggUnlocked;
+};
+
+window.selectPilot = selectPilot;
+window.cyclePilot = cyclePilot;
+
+// Backward compatibility helpers
 window.isPugModeUnlocked = function () {
-    return pugModeUnlocked && pugModeActive;
+    return easterEggUnlocked && (currentPilot === 'coco' || currentPilot === 'brownie');
 };
 
 window.isPugUnlockedEver = function () {
-    return pugModeUnlocked;
+    return easterEggUnlocked;
 };
 
 window.toggleCocoPilot = function () {
-    if (pugModeUnlocked) {
-        pugModeActive = !pugModeActive;
-        updateCocoToggleUI();
+    if (easterEggUnlocked) {
+        cyclePilot();
         return true;
     }
     return false;

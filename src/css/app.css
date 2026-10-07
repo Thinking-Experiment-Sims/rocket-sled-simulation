@@ -249,15 +249,166 @@ body {
     background: #0b5f77;
 }
 
+.header-btn.pilot-btn,
 .header-btn.coco-btn {
     background: #ffffff;
-    color: #d67b19;
-    border: 1.5px solid #d67b19;
+    color: #0f7e9b;
+    border: 1.5px solid #0f7e9b;
     font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
 }
 
+.header-btn.pilot-btn:hover,
 .header-btn.coco-btn:hover {
+    background: #e9f4fb;
+    color: #0b5f77;
+    border-color: #0b5f77;
+}
+
+.pilot-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.pilot-dropdown-container.hidden {
+    display: none !important;
+}
+
+.pilot-menu {
+    min-width: 230px;
+    background: #ffffff;
+    border: 1px solid #c8dbe3;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(12, 54, 68, 0.15);
+    padding: 6px;
+    z-index: 1000;
+}
+
+.pilot-menu .menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    text-align: left;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    color: #123140;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pilot-menu .menu-item:hover {
+    background: #e9f4fb;
+    color: #0f7e9b;
+}
+
+.pilot-menu .menu-item.active {
     background: #fff4dd;
+    color: #b45309;
+    font-weight: 700;
+    border: 1px solid #fed7aa;
+}
+
+/* Easter Egg Selection Cards */
+.easter-egg-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 20px 0;
+}
+
+@media (max-width: 600px) {
+    .easter-egg-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pilot-choice-card {
+    background: #f8fafc;
+    border: 2px solid #c8dbe3;
+    border-radius: 12px;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pilot-choice-card:hover {
+    border-color: #d67b19;
+    background: #fff9ee;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(214, 123, 25, 0.18);
+}
+
+.pilot-choice-card.selected {
+    border-color: #0f7e9b;
+    background: #e9f4fb;
+    box-shadow: 0 0 0 2px #0f7e9b;
+}
+
+.pilot-choice-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 2px solid #c8dbe3;
+    background: #ffffff;
+}
+
+.pilot-choice-avatar-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    background: #ffffff;
+    border: 2px solid #c8dbe3;
+    margin-bottom: 10px;
+}
+
+.pilot-choice-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #123140;
+    margin-bottom: 4px;
+}
+
+.pilot-choice-desc {
+    font-size: 0.8rem;
+    color: #4b6570;
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+.pilot-choice-btn {
+    width: 100%;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid #d67b19;
+    background: #d67b19;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pilot-choice-card:hover .pilot-choice-btn {
+    background: #b86510;
+    border-color: #b86510;
 }
 
 

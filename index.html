@@ -8,7 +8,7 @@
     <meta name="description"
         content="Interactive physics simulation demonstrating Newton's Laws with a rocket sled. Explore forces, friction, and air drag effects on motion.">
     <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="src/css/app.css?v=20261007v2">
+    <link rel="stylesheet" href="src/css/app.css?v=20261007v3">
 </head>
 
 <body>
@@ -27,7 +27,16 @@
                 <div class="hero-actions">
                     <button id="quizBtn" class="header-btn quiz-btn" type="button" title="Test your Newton's Laws understanding">❓ Check Understanding</button>
                     <button id="helpBtn" class="header-btn help-btn" type="button" title="View simulation instructions and challenges">💡 Help</button>
-                    <button id="cocoToggleBtn" class="header-btn coco-btn hidden" type="button" title="Toggle sled pilot">🐶 Pilot: Coco</button>
+                    <div class="dropdown-container pilot-dropdown-container hidden" id="pilotMenuContainer">
+                        <button id="pilotMenuBtn" class="header-btn pilot-btn" type="button" title="Select sled pilot">
+                            <span id="activePilotLabel">🐕 Pilot: Brownie</span> <span style="font-size: 0.75em; margin-left: 2px;">▼</span>
+                        </button>
+                        <div id="pilotDropdown" class="dropdown-menu pilot-menu">
+                            <button class="menu-item pilot-select-btn active" data-pilot="brownie" type="button">🐕 Brownie (New Dog)</button>
+                            <button class="menu-item pilot-select-btn" data-pilot="coco" type="button">🐶 Coco (Classic Pug)</button>
+                            <button class="menu-item pilot-select-btn" data-pilot="penguin" type="button">🐧 Penguin (Aviator)</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
