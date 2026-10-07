@@ -850,7 +850,7 @@ main {
     position: relative;
 }
 
-canvas {
+#canvasContainer canvas {
     display: block;
     position: absolute;
     top: 0;
@@ -1581,13 +1581,13 @@ body.embed #canvasContainer {
 
 .hud-panel {
     pointer-events: auto;
-    background: rgba(13, 17, 23, 0.85);
-    /* Matches bg-panel with opacity */
-    backdrop-filter: blur(4px);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(6px);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 10px 14px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(12, 54, 68, 0.12);
+    color: #123140;
 }
 
 .hud-top-left {
@@ -1610,13 +1610,15 @@ body.embed #canvasContainer {
     grid-row: 3;
     justify-self: center;
     align-self: end;
-    background: rgba(13, 17, 23, 0.95);
-    border-radius: 20px 20px 0 0;
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 16px 16px 0 0;
+    border: 1px solid var(--border);
     border-bottom: none;
     width: auto;
     min-width: 60%;
     margin-bottom: -1px;
     padding: 8px 20px;
+    box-shadow: 0 -2px 8px rgba(12, 54, 68, 0.08);
 }
 
 /* Force Values Table */
@@ -1630,38 +1632,38 @@ body.embed #canvasContainer {
 }
 
 .force-row .label {
-    opacity: 0.8;
-    font-weight: 500;
-    color: var(--text-secondary);
+    opacity: 0.9;
+    font-weight: 600;
+    color: #4b6570;
 }
 
 .force-row .label.applied {
-    color: var(--force-applied);
+    color: #d67b19;
 }
 
 .force-row .label.friction {
-    color: var(--force-friction);
+    color: #e53e3e;
 }
 
 .force-row .label.air {
-    color: var(--force-air);
+    color: #0284c7;
 }
 
 .force-row .label.net {
-    color: var(--primary);
-    font-weight: bold;
+    color: #0f7e9b;
+    font-weight: 700;
 }
 
 .force-row.divider {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid #c8dbe3;
     padding-top: 4px;
     margin-top: 4px;
 }
 
 .force-number {
-    font-family: 'Roboto Mono', monospace;
-    font-weight: 600;
-    color: white;
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    font-weight: 700;
+    color: #123140;
 }
 
 /* Compact Velocimeter */
@@ -1674,26 +1676,27 @@ body.embed #canvasContainer {
 .velocity-value {
     font-size: 1.4rem;
     font-weight: 700;
-    font-family: 'Roboto Mono', monospace;
-    color: var(--primary);
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    color: #0f7e9b;
     margin-bottom: 6px;
-    text-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
+    text-shadow: none;
 }
 
 .velocity-value .unit {
     font-size: 0.8rem;
-    opacity: 0.7;
-    font-weight: normal;
+    opacity: 0.8;
+    font-weight: 500;
+    color: #4b6570;
 }
 
 .velocimeter-gauge-mini {
     width: 120px;
     height: 60px;
     position: relative;
-    background: linear-gradient(90deg, #ff5252 0%, #ffeb3b 50%, #4caf50 100%);
+    background: linear-gradient(90deg, #10b981 0%, #f59e0b 60%, #ef4444 100%);
     border-radius: 60px 60px 0 0;
     overflow: hidden;
-    box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 -2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .velocimeter-gauge-mini::after {
@@ -1703,15 +1706,14 @@ body.embed #canvasContainer {
     left: 10%;
     width: 80%;
     height: 80%;
-    background: rgba(13, 17, 23, 0.85);
-    /* Match panel bg */
+    background: #ffffff;
     border-radius: 50% 50% 0 0;
 }
 
 .velocimeter-gauge-mini .needle {
     width: 4px;
     height: 55px;
-    background: white;
+    background: #123140;
     bottom: 0;
     left: 50%;
     position: absolute;
@@ -1720,7 +1722,7 @@ body.embed #canvasContainer {
     transition: transform 0.1s cubic-bezier(0.1, 0.7, 1.0, 0.1);
     z-index: 2;
     border-radius: 2px;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
 }
 
 .velocimeter-gauge-mini .needle::before {
@@ -1730,7 +1732,7 @@ body.embed #canvasContainer {
     left: -4px;
     width: 12px;
     height: 12px;
-    background: white;
+    background: #123140;
     border-radius: 50%;
 }
 
@@ -1747,15 +1749,147 @@ body.embed #canvasContainer {
     align-items: center;
     gap: 6px;
     font-size: 0.85rem;
-    color: var(--text-secondary);
-    font-weight: 500;
+    color: #4b6570;
+    font-weight: 600;
 }
 
 .legend-item .dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    box-shadow: 0 0 4px currentColor;
+    box-shadow: 0 0 2px currentColor;
+}
+
+/* ========================================
+   Real-Time Motion Graphs Panel
+   ======================================== */
+.motion-graphs-panel {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-top: 14px;
+    box-shadow: 0 4px 14px rgba(12, 54, 68, 0.06);
+    transition: all 0.3s ease;
+}
+
+.motion-graphs-panel.collapsed {
+    display: none;
+}
+
+.graphs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e9f4fb;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.graphs-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.graphs-title h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #0f7e9b;
+    font-weight: 700;
+}
+
+.graphs-subtitle {
+    font-size: 0.8rem;
+    color: #4b6570;
+    font-weight: 500;
+}
+
+.graph-action-btn {
+    background: #e9f4fb;
+    color: #0f7e9b;
+    border: 1px solid #c8dbe3;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.graph-action-btn:hover {
+    background: #d4ecf4;
+    color: #0b5f77;
+}
+
+.graphs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+@media (max-width: 900px) {
+    .graphs-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.graph-card {
+    background: #f8fafc;
+    border: 1px solid #c8dbe3;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.graph-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.graph-badge {
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.graph-badge.pos {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+.graph-badge.vel {
+    background: #fff4dd;
+    color: #b45309;
+    border: 1px solid #fed7aa;
+}
+
+.graph-val {
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #123140;
+}
+
+.kinematic-canvas {
+    width: 100%;
+    height: 140px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    display: block;
+    position: relative;
+    box-sizing: border-box;
 }
 
 .dot.applied {

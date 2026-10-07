@@ -8,7 +8,7 @@
     <meta name="description"
         content="Interactive physics simulation demonstrating Newton's Laws with a rocket sled. Explore forces, friction, and air drag effects on motion.">
     <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="stylesheet" href="src/css/app.css?v=20261007v1">
+    <link rel="stylesheet" href="src/css/app.css?v=20261007v2">
 </head>
 
 <body>
@@ -113,6 +113,7 @@
                 <div class="viz-controls">
                     <button id="forceArrowsBtn" class="viz-btn">📊 Force Arrows</button>
                     <button id="gridBtn" class="viz-btn">📐 Grid</button>
+                    <button id="motionGraphsBtn" class="viz-btn active" title="Toggle Real-Time Motion Graphs">📈 Motion Graphs</button>
 
                     <!-- Presets Dropdown Menu -->
                     <div class="dropdown-container">
@@ -218,6 +219,36 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Real-Time Motion Graphs (x-t & v-t) -->
+                <div id="motionGraphsContainer" class="motion-graphs-panel">
+                    <div class="graphs-header">
+                        <div class="graphs-title">
+                            <span class="graphs-icon">📈</span>
+                            <h3>Real-Time Motion Graphs</h3>
+                            <span class="graphs-subtitle">Position x(t) &bull; Velocity v(t)</span>
+                        </div>
+                        <div class="graphs-actions">
+                            <button id="clearGraphsBtn" class="graph-action-btn" type="button" title="Clear motion history">🧹 Clear Graphs</button>
+                        </div>
+                    </div>
+                    <div class="graphs-grid">
+                        <div class="graph-card">
+                            <div class="graph-card-header">
+                                <span class="graph-badge pos">Position x(t)</span>
+                                <span id="graphCurrentPos" class="graph-val">0.0 m</span>
+                            </div>
+                            <canvas id="posGraphCanvas" class="kinematic-canvas"></canvas>
+                        </div>
+                        <div class="graph-card">
+                            <div class="graph-card-header">
+                                <span class="graph-badge vel">Velocity v(t)</span>
+                                <span id="graphCurrentVel" class="graph-val">0.0 m/s</span>
+                            </div>
+                            <canvas id="velGraphCanvas" class="kinematic-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
             </section>
 
 
@@ -280,8 +311,7 @@
                     <div class="quiz-options">
                         <button class="quiz-opt" onclick="checkAnswer(this, false)">It stops immediately</button>
                         <button class="quiz-opt" onclick="checkAnswer(this, false)">It slowly slows down</button>
-                        <button class="quiz-opt" onclick="checkAnswer(this, true)">It creates constant velocity
-                            forever</button>
+                        <button class="quiz-opt" onclick="checkAnswer(this, true)">It continues moving at a constant velocity forever</button>
                     </div>
                     <div class="feedback"></div>
                     <button class="next-btn hidden" onclick="nextQuestion(2)">Next ➡️</button>
@@ -317,10 +347,13 @@
     <script src="src/js/physics.js?v=20261007v1"></script>
 
     <!-- Visualization (p5.js sketch) -->
-    <script src="src/js/visualization.js?v=20261007v1"></script>
+    <script src="src/js/visualization.js?v=20261007v2"></script>
+
+    <!-- Motion Graphs (Real-Time Kinematics) -->
+    <script src="src/js/motionGraphs.js?v=20261007v2"></script>
 
     <!-- Main Application Controller -->
-    <script src="src/js/main.js?v=20261007v1"></script>
+    <script src="src/js/main.js?v=20261007v2"></script>
 </body>
 
 </html>

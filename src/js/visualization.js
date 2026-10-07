@@ -1,17 +1,18 @@
 /**
  * Rocket Sled Visualization
  * p5.js sketch for rendering the sled, track, and force diagram
+ * Adheres strictly to The Thinking Experiment Design System (Light Mode Only)
  */
 
 // Canvas and display settings
 let canvasWidth, canvasHeight;
 const TRACK_Y_RATIO = 0.6; // Track vertical position as ratio of canvas height
-const SLED_WIDTH = 80;
-const SLED_HEIGHT = 50;
+const SLED_WIDTH = 84;
+const SLED_HEIGHT = 48;
 const WHEEL_RADIUS = 12;
 
-// Pug image
-let pugImage;
+// Character asset
+let cocoImage;
 
 // Display options - default OFF for cleaner initial view
 let showForceArrows = false;
@@ -20,39 +21,44 @@ let showGrid = false;
 // Jet animation
 let jetFlameOffset = 0;
 
-// Snow system configuration
-const SNOW_COUNT = 100;
+// Snow & particle system configuration
+const SNOW_COUNT = 80;
 const snowParticles = [];
+const exhaustParticles = [];
 
 // Parallax background scrolling
 let bgOffset = 0; // Tracks cumulative background position
 
-// Color palette (matches CSS variables)
+// Color palette (matches The Thinking Experiment brand guidelines)
 const COLORS = {
-    primary: '#00BCD4',
-    bgDark: '#0d1117',
-    bgLight: '#1a1f26',
-    text: '#e0e0e0',
-    textSecondary: '#9e9e9e',
-    forceApplied: '#FF9800',
-    forceNormal: '#4CAF50',
-    forceGravity: '#9C27B0',
-    forceFriction: '#F44336',
-    forceAir: '#2196F3',
-    track: '#3a4149',
-    sled: '#455A64',
-    sledAccent: '#78909C',
-    wheel: '#263238',
-    jet: '#FF5722',
-    jetGlow: '#FFAB91'
+    primary: '#0f7e9b',     // Teal
+    accent: '#d67b19',      // Amber
+    bgDark: '#f8fafc',      // Light canvas background
+    bgLight: '#ffffff',
+    text: '#123140',
+    textSecondary: '#4b6570',
+    forceApplied: '#d67b19',
+    forceNormal: '#10b981',
+    forceGravity: '#64748b',
+    forceFriction: '#ef4444',
+    forceAir: '#0284c7',
+    track: '#475569',
+    sled: '#0f7e9b',
+    sledAccent: '#d67b19',
+    wheel: '#334155',
+    jet: '#ea580c',
+    jetGlow: '#fef08a'
 };
 
 // p5.js preload function - loads assets before setup
 function preload() {
-    console.log('Attempting to load pug image...');
-    pugImage = loadImage('pug.png',
-        () => console.log('Pug image loaded successfully!'),
-        (err) => console.error('Failed to load pug image:', err)
+    console.log('Attempting to load Coco image...');
+    cocoImage = loadImage('coco.png',
+        () => console.log('Coco image loaded successfully!'),
+        (err) => {
+            console.log('Falling back to pug.png...');
+            cocoImage = loadImage('pug.png');
+        }
     );
 }
 
@@ -69,6 +75,9 @@ function setup() {
 
     // Smooth animations
     frameRate(60);
+
+    // Initialize snow
+    initSnow();
 }
 
 // p5.js window resize handler
@@ -80,25 +89,25 @@ function windowResized() {
     canvasHeight = container.clientHeight;
     resizeCanvas(canvasWidth, canvasHeight);
 
-    // Initialize snow particles
+    // Reinitialize snow
     initSnow();
 }
 
 // p5.js main draw loop
 function draw() {
-    // Clear background
-    background(COLORS.bgDark);
+    // Clear background to clean soft ice-white
+    background('#f8fafc');
 
     // Get current physics state
-    const state = getPhysicsState();
+    const state = typeof getPhysicsState === 'function' ? getPhysicsState() : { velocity: 0, position: 0, netForce: 0, mass: 250 };
 
     // Update background offset based on velocity (parallax scrolling)
-    bgOffset += state.velocity * 2; // Scale for visual effect
+    bgOffset += state.velocity * 2;
 
-    // Draw parallax background layers
+    // Draw daylight arctic parallax background layers
     drawParallaxBackground(state.velocity);
 
-    // Draw grid if enabled (on top of background)
+    // Draw blueprint grid if enabled
     if (showGrid) {
         drawGrid();
     }
@@ -106,11 +115,14 @@ function draw() {
     // Draw track
     drawTrack();
 
-    // Sled stays fixed at center of screen - background moves instead
+    // Sled stays centered on screen horizontally
     const sledScreenX = canvasWidth / 2;
     const sledScreenY = canvasHeight * TRACK_Y_RATIO - SLED_HEIGHT / 2 - WHEEL_RADIUS;
 
-    // Draw sled
+    // Draw rocket exhaust particles
+    updateAndDrawParticles(sledScreenX, sledScreenY, state);
+
+    // Draw sled and active pilot (Penguin or Coco)
     drawSled(sledScreenX, sledScreenY, state);
 
     // Draw force diagram if enabled
@@ -119,119 +131,138 @@ function draw() {
         drawFreeBodyDiagramOverlay(state);
     }
 
-    // Draw snow (on top of everything for depth)
+    // Draw snow particles
     drawSnow(state.velocity);
 
-    // Draw velocity indicator
-    drawVelocityArrow(sledScreenX, sledScreenY - SLED_HEIGHT - 30, state.velocity);
+    // Draw velocity vector arrow
+    drawVelocityArrow(sledScreenX, sledScreenY - SLED_HEIGHT - 32, state.velocity);
 
-    // Update jet animation
-    jetFlameOffset = (jetFlameOffset + 0.3) % (Math.PI * 2);
+    // Update jet oscillation
+    jetFlameOffset = (jetFlameOffset + 0.35) % (Math.PI * 2);
 }
 
 /**
- * Draw parallax scrolling background to simulate motion
- * Three layers scroll at different speeds for depth effect
- * Includes prominent objects (trees, poles, signs) to show motion clearly
+ * Draw daytime arctic parallax scrolling background
  */
 function drawParallaxBackground(velocity) {
     const trackY = canvasHeight * TRACK_Y_RATIO;
     const skyHeight = trackY;
 
-    // Sky gradient
+    // Crisp daylight winter sky gradient (light ice-blue to horizon white)
     for (let y = 0; y < skyHeight; y++) {
         const inter = map(y, 0, skyHeight, 0, 1);
-        const c = lerpColor(color('#1a1a2e'), color('#16213e'), inter);
+        const c = lerpColor(color('#dbeafe'), color('#f8fafc'), inter);
         stroke(c);
         line(0, y, canvasWidth, y);
     }
 
-    // Layer 1: Distant mountains (slowest parallax - 0.1x)
+    // Layer 1: Distant snow-capped alpine mountains (0.1x parallax)
     const mountainOffset = bgOffset * 0.1;
-    fill('#2d3a4a');
+    fill('#cbd5e1'); // Atmospheric mountain slate
     noStroke();
 
-    for (let i = -1; i <= Math.ceil(canvasWidth / 200) + 1; i++) {
-        const baseX = (i * 200 - (mountainOffset % 200));
+    for (let i = -1; i <= Math.ceil(canvasWidth / 220) + 1; i++) {
+        const baseX = (i * 220 - (mountainOffset % 220));
         beginShape();
-        vertex(baseX - 50, skyHeight);
-        vertex(baseX + 30, skyHeight - 80);
-        vertex(baseX + 60, skyHeight - 120);
-        vertex(baseX + 100, skyHeight - 90);
-        vertex(baseX + 150, skyHeight - 140);
-        vertex(baseX + 200, skyHeight - 70);
-        vertex(baseX + 250, skyHeight);
+        vertex(baseX - 60, skyHeight);
+        vertex(baseX + 25, skyHeight - 85);
+        vertex(baseX + 55, skyHeight - 125);
+        vertex(baseX + 95, skyHeight - 95);
+        vertex(baseX + 145, skyHeight - 145);
+        vertex(baseX + 195, skyHeight - 75);
+        vertex(baseX + 260, skyHeight);
         endShape(CLOSE);
+
+        // Crisp white snowcaps on mountain peaks
+        fill('#ffffff');
+        beginShape();
+        vertex(baseX + 55, skyHeight - 125);
+        vertex(baseX + 40, skyHeight - 105);
+        vertex(baseX + 55, skyHeight - 110);
+        vertex(baseX + 70, skyHeight - 105);
+        endShape(CLOSE);
+
+        beginShape();
+        vertex(baseX + 145, skyHeight - 145);
+        vertex(baseX + 128, skyHeight - 120);
+        vertex(baseX + 145, skyHeight - 128);
+        vertex(baseX + 162, skyHeight - 120);
+        endShape(CLOSE);
+        fill('#cbd5e1');
     }
 
-    // Layer 2: Trees in background (medium parallax - 0.4x) - LARGER and BRIGHTER
+    // Layer 2: Stylized evergreen pine trees (0.4x parallax)
     const treeOffset = bgOffset * 0.4;
-    const treeSpacing = 150;
+    const treeSpacing = 160;
     const centerX = canvasWidth / 2;
-    const clearZone = 180; // Clear zone around sled for force arrows visibility
+    const clearZone = 190; // Clear zone around sled for force arrow clarity
 
     for (let i = -1; i <= Math.ceil(canvasWidth / treeSpacing) + 2; i++) {
         const treeX = (i * treeSpacing - (treeOffset % treeSpacing));
-
-        // Skip trees near the center (clear zone for force arrows)
         if (Math.abs(treeX - centerX) < clearZone) continue;
 
-        const treeHeight = 80 + (i % 3) * 20; // Taller trees
+        const treeHeight = 75 + (Math.abs(i) % 3) * 18;
 
-        // Tree trunk - brown
-        fill('#8B4513');
+        // Tree trunk (slate bark)
+        fill('#475569');
         noStroke();
-        rect(treeX - 6, skyHeight - treeHeight, 12, treeHeight);
+        rect(treeX - 4, skyHeight - treeHeight, 8, treeHeight);
 
-        // Tree foliage - bright green triangles
-        fill('#228B22');
+        // Evergreen pine tiers (Teal/Pine tones)
+        fill('#0f766e');
         triangle(
-            treeX, skyHeight - treeHeight - 50,
-            treeX - 35, skyHeight - treeHeight + 15,
-            treeX + 35, skyHeight - treeHeight + 15
+            treeX, skyHeight - treeHeight - 45,
+            treeX - 30, skyHeight - treeHeight + 12,
+            treeX + 30, skyHeight - treeHeight + 12
         );
-        fill('#2E8B2E');
+        fill('#115e59');
         triangle(
-            treeX, skyHeight - treeHeight - 30,
-            treeX - 28, skyHeight - treeHeight + 25,
-            treeX + 28, skyHeight - treeHeight + 25
+            treeX, skyHeight - treeHeight - 25,
+            treeX - 24, skyHeight - treeHeight + 22,
+            treeX + 24, skyHeight - treeHeight + 22
+        );
+
+        // Snow dusting on pine branches
+        fill('#ffffff');
+        triangle(
+            treeX, skyHeight - treeHeight - 45,
+            treeX - 10, skyHeight - treeHeight - 32,
+            treeX + 10, skyHeight - treeHeight - 32
         );
     }
 
-    // Layer 3: Utility poles (faster parallax - 0.7x) - TALLER and more visible
+    // Layer 3: Utility poles (0.7x parallax)
     const poleOffset = bgOffset * 0.7;
-    const poleSpacing = 250;
+    const poleSpacing = 260;
 
     for (let i = -1; i <= Math.ceil(canvasWidth / poleSpacing) + 2; i++) {
         const poleX = (i * poleSpacing - (poleOffset % poleSpacing));
-
-        // Skip poles near the center (clear zone for force arrows)
         if (Math.abs(poleX - centerX) < clearZone) continue;
 
-        // Pole - gray with outline
-        fill('#808080');
-        stroke('#606060');
-        strokeWeight(2);
-        rect(poleX - 4, skyHeight - 120, 8, 120);
-
-        // Crossbar - bright
-        fill('#A0A0A0');
-        rect(poleX - 25, skyHeight - 115, 50, 6);
-
-        // Yellow warning markers on pole
-        fill('#FFD700');
+        // Pole - silver slate
+        fill('#64748b');
         noStroke();
-        rect(poleX - 5, skyHeight - 30, 10, 20);
+        rect(poleX - 3, skyHeight - 110, 6, 110);
 
-        noStroke();
+        // Crossbar
+        fill('#94a3b8');
+        rect(poleX - 22, skyHeight - 105, 44, 5, 2);
+
+        // Amber warning reflector (brand compliant)
+        fill('#d67b19');
+        rect(poleX - 4, skyHeight - 28, 8, 16, 2);
     }
 
-    // Ground area below track (Snowy White)
-    fill('#E8EAF6');
+    // Ground snow bank below track
+    fill('#ffffff');
     noStroke();
     rect(0, trackY + 8, canvasWidth, canvasHeight - trackY - 8);
 
-    // Layer 4: Distance markers/signs (1x parallax) - LARGER and BRIGHTER
+    // Subtle track ballast layer
+    fill('#e2e8f0');
+    rect(0, trackY + 8, canvasWidth, 6);
+
+    // Layer 4: Modern distance markers (1.0x parallax)
     const signOffset = bgOffset * 1.0;
     const signSpacing = 250;
 
@@ -239,93 +270,121 @@ function drawParallaxBackground(velocity) {
         const signX = (i * signSpacing - (signOffset % signSpacing));
         const distanceValue = Math.floor(Math.abs(bgOffset / 50) + i * 6);
 
-        // Sign post - silver
-        fill('#A0A0A0');
-        stroke('#808080');
-        strokeWeight(1);
-        rect(signX - 3, trackY - 70, 6, 70);
+        // Sign post
+        fill('#94a3b8');
+        rect(signX - 3, trackY - 65, 6, 65, 1);
 
-        // Sign board - bright blue with yellow border
-        fill('#0066CC');
-        stroke('#FFD700');
-        strokeWeight(3);
-        rect(signX - 30, trackY - 95, 60, 30, 5);
+        // Sign board - clean white card with Teal border
+        fill('#ffffff');
+        stroke('#0f7e9b');
+        strokeWeight(2);
+        rect(signX - 28, trackY - 90, 56, 26, 6);
 
-        // Distance text - white and bold
+        // Distance text
         noStroke();
-        fill('#FFFFFF');
-        textSize(14);
+        fill('#123140');
+        textSize(12);
         textStyle(BOLD);
         textAlign(CENTER, CENTER);
-        text(`${distanceValue}m`, signX, trackY - 80);
+        text(`${distanceValue}m`, signX, trackY - 77);
         textStyle(NORMAL);
     }
 
-    // Layer 5: Ground stripes (fastest - 1.5x for speed emphasis)
-    const stripeOffset = bgOffset * 1.5;
-    const stripeSpacing = 50;
-
-    fill('#5a5a65');
+    // Layer 5: Ground snow dashes (1.5x parallax)
+    const dashOffset = bgOffset * 1.5;
+    fill('#cbd5e1');
     noStroke();
-    for (let i = -1; i <= Math.ceil(canvasWidth / stripeSpacing) + 3; i++) {
-        const stripeX = (i * stripeSpacing - (stripeOffset % stripeSpacing));
-        rect(stripeX, trackY + 12, 25, 5, 2);
-    }
-
-    // Ground dashes (very fast - 2x) - brighter
-    const dashOffset = bgOffset * 2.0;
-    fill('#7a7a85');
-    for (let i = -1; i <= Math.ceil(canvasWidth / 20) + 3; i++) {
-        const dashX = (i * 20 - (dashOffset % 20));
-        rect(dashX, trackY + 22, 8, 3);
+    for (let i = -1; i <= Math.ceil(canvasWidth / 60) + 3; i++) {
+        const dashX = (i * 60 - (dashOffset % 60));
+        rect(dashX, trackY + 18, 22, 3, 2);
     }
 }
 
 /**
- * Draw background grid
+ * Draw background blueprint grid
  */
 function drawGrid() {
-    stroke(COLORS.track);
+    stroke('rgba(200, 219, 227, 0.6)');
     strokeWeight(1);
 
-    // Vertical lines
     for (let x = 0; x < canvasWidth; x += 50) {
         line(x, 0, x, canvasHeight);
     }
-
-    // Horizontal lines
     for (let y = 0; y < canvasHeight; y += 50) {
         line(0, y, canvasWidth, y);
     }
 }
 
 /**
- * Draw the horizontal track
+ * Draw the horizontal engineering track
  */
 function drawTrack() {
     const trackY = canvasHeight * TRACK_Y_RATIO;
 
-    // Main track surface
+    // Track bed
+    fill('#334155');
     noStroke();
-    fill(COLORS.track);
-    rect(50, trackY, canvasWidth - 100, 8, 4);
+    rect(40, trackY, canvasWidth - 80, 8, 4);
 
-    // Distance markers
-    fill(COLORS.textSecondary);
+    // Metallic rail shine
+    fill('#94a3b8');
+    rect(40, trackY + 1, canvasWidth - 80, 2);
+
+    // Track meter tick marks
+    fill('#64748b');
     textSize(10);
     textAlign(CENTER);
 
     for (let i = 0; i <= 10; i++) {
         const x = 50 + (canvasWidth - 100) * (i / 10);
-
-        // Marker line
-        stroke(COLORS.text);
+        stroke('#64748b');
         strokeWeight(1);
         line(x, trackY + 8, x, trackY + 16);
 
-        // Label
         noStroke();
         text(`${(i - 5) * 10}m`, x, trackY + 28);
+    }
+}
+
+/**
+ * Update and draw rocket exhaust particle embers
+ */
+function updateAndDrawParticles(sledX, sledY, state) {
+    // Generate exhaust particles when thrusters are active
+    if (state.thrustDirection !== 0) {
+        const isRightThrust = state.thrustDirection === 1;
+        const emitterX = sledX + (isRightThrust ? -SLED_WIDTH / 2 - 16 : SLED_WIDTH / 2 + 16);
+        const emitterY = sledY + SLED_HEIGHT / 2;
+
+        for (let i = 0; i < 2; i++) {
+            exhaustParticles.push({
+                x: emitterX,
+                y: emitterY + (Math.random() * 8 - 4),
+                vx: (isRightThrust ? -1 : 1) * (Math.random() * 4 + 2) - state.velocity * 0.1,
+                vy: Math.random() * 2 - 1,
+                size: Math.random() * 8 + 6,
+                alpha: 220,
+                color: Math.random() > 0.4 ? '#d67b19' : '#f59e0b'
+            });
+        }
+    }
+
+    // Update and draw existing particles
+    for (let i = exhaustParticles.length - 1; i >= 0; i--) {
+        const p = exhaustParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.size *= 0.94;
+        p.alpha -= 8;
+
+        if (p.alpha <= 0 || p.size < 1) {
+            exhaustParticles.splice(i, 1);
+            continue;
+        }
+
+        noStroke();
+        fill(p.color);
+        ellipse(p.x, p.y, p.size);
     }
 }
 
@@ -336,227 +395,358 @@ function drawSled(x, y, state) {
     push();
     translate(x, y);
 
-    // Wheels
+    const v = state ? state.velocity : 0;
+    const speed = Math.abs(v);
+
+    // Suspension vibration scaling with velocity
+    const vibration = speed > 1 ? Math.sin(frameCount * 0.9) * Math.min(speed * 0.03, 1) : 0;
+    translate(0, vibration);
+
+    // Wheels / Runners (Titanium alloy with Amber rims)
     fill(COLORS.wheel);
     noStroke();
     ellipse(-SLED_WIDTH / 3, SLED_HEIGHT / 2 + WHEEL_RADIUS / 2, WHEEL_RADIUS * 2);
     ellipse(SLED_WIDTH / 3, SLED_HEIGHT / 2 + WHEEL_RADIUS / 2, WHEEL_RADIUS * 2);
 
-    // Wheel highlights
+    // Amber rim highlights
     fill(COLORS.sledAccent);
-    ellipse(-SLED_WIDTH / 3 - 2, SLED_HEIGHT / 2 + WHEEL_RADIUS / 2 - 2, WHEEL_RADIUS);
-    ellipse(SLED_WIDTH / 3 - 2, SLED_HEIGHT / 2 + WHEEL_RADIUS / 2 - 2, WHEEL_RADIUS);
+    ellipse(-SLED_WIDTH / 3, SLED_HEIGHT / 2 + WHEEL_RADIUS / 2, WHEEL_RADIUS * 1.1);
+    ellipse(SLED_WIDTH / 3, SLED_HEIGHT / 2 + WHEEL_RADIUS / 2, WHEEL_RADIUS * 1.1);
+    fill('#f8fafc');
+    ellipse(-SLED_WIDTH / 3, SLED_HEIGHT / 2 + WHEEL_RADIUS / 2, WHEEL_RADIUS * 0.5);
+    ellipse(SLED_WIDTH / 3, SLED_HEIGHT / 2 + WHEEL_RADIUS / 2, WHEEL_RADIUS * 0.5);
 
-    // Main body
+    // Main Chassis (Sleek aerodynamic Teal #0f7e9b)
     fill(COLORS.sled);
-    rect(-SLED_WIDTH / 2, 0, SLED_WIDTH, SLED_HEIGHT, 8);
+    stroke('#0b5f77');
+    strokeWeight(1.5);
+    rect(-SLED_WIDTH / 2, 0, SLED_WIDTH, SLED_HEIGHT, 10);
 
-    // Body highlight
+    // Racing stripe (Amber #d67b19)
     fill(COLORS.sledAccent);
-    rect(-SLED_WIDTH / 2 + 5, 5, SLED_WIDTH - 10, 15, 4);
+    noStroke();
+    rect(-SLED_WIDTH / 2 + 6, 8, SLED_WIDTH - 12, 10, 4);
 
-    // Cockpit
-    fill(COLORS.primary);
-    ellipse(0, SLED_HEIGHT / 3, 30, 20);
-    fill(COLORS.bgDark);
-    ellipse(0, SLED_HEIGHT / 3, 22, 14);
+    // Chrome Cockpit Rim
+    fill('#ffffff');
+    stroke('#c8dbe3');
+    strokeWeight(1.5);
+    ellipse(0, SLED_HEIGHT / 3, 34, 22);
+    fill('#f1f5f9');
+    ellipse(0, SLED_HEIGHT / 3, 26, 16);
 
-    // Rocket jets on sides
-    // Logic corrected for Newton's 3rd Law:
-    // To go LEFT (Force < 0), we need exhaust to go RIGHT. So Right rocket fires.
-    // To go RIGHT (Force > 0), we need exhaust to go LEFT. So Left rocket fires.
+    // Left Rocket (fires when thrust is Positive -> Right)
+    drawRocket(-SLED_WIDTH / 2 - 8, SLED_HEIGHT / 2, -1, state.thrustDirection === 1);
 
-    // Left Rocket (Points Left): Fires when thrust is Positive (Right)
-    drawRocket(-SLED_WIDTH / 2 - 10, SLED_HEIGHT / 2, -1, state.thrustDirection === 1);
+    // Right Rocket (fires when thrust is Negative -> Left)
+    drawRocket(SLED_WIDTH / 2 + 8, SLED_HEIGHT / 2, 1, state.thrustDirection === -1);
 
-    // Right Rocket (Points Right): Fires when thrust is Negative (Left)
-    drawRocket(SLED_WIDTH / 2 + 10, SLED_HEIGHT / 2, 1, state.thrustDirection === -1);
-
-    // Draw Character (Penguin or Pug if unlocked!)
-    drawCharacter(0, -5, state.thrustDirection);
+    // Draw Character (Penguin or Coco)
+    drawCharacter(0, -6, state.thrustDirection, state);
 
     pop();
 }
 
 /**
- * Draw a character on the sled (penguin by default, pug if unlocked)
+ * Draw active pilot character on the sled
  */
-function drawCharacter(x, y, facing) {
-    // Check if pug mode is unlocked
+function drawCharacter(x, y, facing, state) {
     const usePug = typeof window.isPugModeUnlocked === 'function' && window.isPugModeUnlocked();
 
     if (usePug) {
-        drawPug(x, y, facing);
+        drawCoco(x, y, facing, state);
     } else {
-        drawPenguin(x, y, facing);
+        drawPenguin(x, y, facing, state);
     }
 }
 
 /**
- * Draw a pug character on the sled
+ * Draw Coco the dog riding the sled
  */
-function drawPug(x, y, facing) {
+function drawCoco(x, y, facing, state) {
     push();
     translate(x, y);
 
-    // Flip horizontally when thrusting left
-    if (facing === -1) {
+    const v = state ? state.velocity : 0;
+    const isMoving = Math.abs(v) > 0.5;
+    const bob = isMoving ? Math.sin(frameCount * 0.3) * Math.min(Math.abs(v) * 0.08, 2.5) : 0;
+
+    // coco.png naturally faces LEFT.
+    // When thrusting/moving right, flip horizontally so Coco faces right!
+    if (facing === 1 || (facing === 0 && v >= 0)) {
         scale(-1, 1);
     }
 
-    // Check if image is loaded
-    if (pugImage && pugImage.width > 0) {
-        // Scale and position the pug
-        const pugSize = 60; // Slightly larger for better visibility
-
-        // Draw with circular mask to remove white background
-        push();
-        // Create circular clipping mask
-        drawingContext.save();
-        drawingContext.beginPath();
-        drawingContext.arc(0, -10, pugSize / 2, 0, Math.PI * 2);
-        drawingContext.clip();
+    if (cocoImage && cocoImage.width > 0) {
+        const cocoW = 74;
+        const cocoH = cocoW / 1.475; // ~50px natural aspect ratio
 
         imageMode(CENTER);
-        image(pugImage, 0, -10, pugSize, pugSize);
-
-        drawingContext.restore();
-        pop();
-
-        // Only log once
-        if (frameCount === 60) {
-            console.log('✅ Pug is being drawn! Size:', pugSize, 'Image dimensions:', pugImage.width, 'x', pugImage.height);
-        }
+        image(cocoImage, 0, -cocoH / 2 + 6 + bob, cocoW, cocoH);
     } else {
-        // Fallback: draw a simple dog placeholder if image hasn't loaded
-        fill(139, 69, 19); // Brown color for dog
+        // Fallback vector representation
+        fill(140, 120, 110);
         noStroke();
-        ellipse(0, -10, 40, 40); // Head
-        ellipse(0, 5, 35, 30); // Body
-
-        // Ears
-        fill(101, 50, 15);
-        ellipse(-15, -15, 15, 20);
-        ellipse(15, -15, 15, 20);
-
-        // Eyes
-        fill(0);
-        ellipse(-8, -12, 5, 5);
-        ellipse(8, -12, 5, 5);
-
-        // Only log once per second
-        if (frameCount % 60 === 0) {
-            console.log('❌ Pug image not loaded. pugImage:', pugImage, 'width:', pugImage ? pugImage.width : 'N/A');
-        }
+        ellipse(0, -16 + bob, 36, 36);
+        fill(40);
+        ellipse(-8, -17 + bob, 5, 5);
+        fill('#0f7e9b'); // Teal collar
+        rect(-14, -6 + bob, 28, 6, 2);
     }
 
     pop();
 }
 
 /**
- * Draw a penguin character on the sled
+ * Draw modern, aerodynamic penguin character with dynamic inertia and wind scarf
  */
-function drawPenguin(x, y, facing) {
+function drawPenguin(x, y, facing, state) {
     push();
     translate(x, y);
 
-    // Scale down
-    scale(0.8);
+    const v = state ? state.velocity : 0;
+    const a = state && state.mass ? (state.netForce / state.mass) : 0;
 
-    // Body
-    fill(255);
-    stroke(0);
-    strokeWeight(2);
-    ellipse(0, 0, 40, 50); // White belly
+    // 1. Dynamic aerodynamic inertia lean:
+    // Leans back into thrust acceleration, braces forward under braking friction/drag
+    const leanAngle = constrain(-a * 0.012, -0.25, 0.25);
+    rotate(leanAngle);
 
-    // Head/Back (black parts)
-    fill(30);
+    // Subtle suspension bounce from motion
+    const bounce = Math.abs(v) > 0.5 ? Math.sin(frameCount * 0.35) * Math.min(Math.abs(v) * 0.04, 1.5) : 0;
+    translate(0, bounce);
+
+    scale(0.85);
+
+    // 2. Dynamic Amber Scarf (trailing behind in the wind opposite to motion)
+    const speed = Math.abs(v);
+    const windDir = v !== 0 ? -Math.sign(v) : (facing !== 0 ? -facing : -1);
+    const flutterAmp = Math.min(4 + Math.sqrt(speed) * 2, 16);
+    const wave = Math.sin(frameCount * 0.4 + speed * 0.08) * flutterAmp;
+    const wave2 = Math.cos(frameCount * 0.35 + speed * 0.06) * (flutterAmp * 0.8);
+
+    // Draw scarf tails BEHIND the body
+    if (speed > 0.5 || Math.abs(facing) > 0) {
+        fill('#d67b19'); // Amber scarf
+        stroke('#b86510');
+        strokeWeight(1);
+
+        // First ribbon
+        beginShape();
+        vertex(8 * windDir, -8);
+        bezierVertex(
+            18 * windDir, -10 + wave * 0.5,
+            30 * windDir, -16 + wave,
+            (40 + speed * 0.5) * windDir, -12 + wave
+        );
+        vertex((38 + speed * 0.5) * windDir, -4 + wave);
+        bezierVertex(
+            28 * windDir, -6 + wave * 0.6,
+            16 * windDir, -4,
+            8 * windDir, -2
+        );
+        endShape(CLOSE);
+
+        // Second ribbon (lower)
+        fill('#b86510');
+        beginShape();
+        vertex(5 * windDir, -5);
+        bezierVertex(
+            15 * windDir, -8 + wave2 * 0.5,
+            26 * windDir, -12 + wave2,
+            (34 + speed * 0.4) * windDir, -8 + wave2
+        );
+        vertex((32 + speed * 0.4) * windDir, -2 + wave2);
+        bezierVertex(
+            22 * windDir, -4 + wave2 * 0.6,
+            12 * windDir, -2,
+            5 * windDir, 0
+        );
+        endShape(CLOSE);
+    }
+
+    // 3. Penguin Body (sleek, aerodynamic vector art)
+    fill(24, 28, 36);
+    stroke(15, 18, 24);
+    strokeWeight(1.5);
+    ellipse(0, 4, 38, 44); // Torso
+
+    // White belly
+    fill(255, 255, 255);
     noStroke();
-    arc(0, 0, 42, 52, PI + QUARTER_PI, TWO_PI - QUARTER_PI, CHORD);
-    ellipse(0, -20, 35, 30); // Head
+    ellipse(0, 6, 26, 34);
+
+    // Head
+    fill(24, 28, 36);
+    stroke(15, 18, 24);
+    strokeWeight(1.5);
+    ellipse(0, -18, 34, 30); // Head
+
+    // Eye direction based on motion/thrust
+    let eyeShift = 0;
+    if (facing === 1 || (facing === 0 && v > 1)) eyeShift = 2.5;
+    if (facing === -1 || (facing === 0 && v < -1)) eyeShift = -2.5;
 
     // Eyes
     fill(255);
-    ellipse(-8, -22, 10, 10);
-    ellipse(8, -22, 10, 10);
-    fill(0);
+    noStroke();
+    ellipse(-8 + eyeShift * 0.5, -20, 10, 10);
+    ellipse(8 + eyeShift * 0.5, -20, 10, 10);
 
-    // Eye direction based on thrust
-    let pupilOffset = 0;
-    if (facing === 1) pupilOffset = 2;
-    if (facing === -1) pupilOffset = -2;
-
-    ellipse(-8 + pupilOffset, -22, 3, 3);
-    ellipse(8 + pupilOffset, -22, 3, 3);
+    // Pupils with catchlight gleam
+    fill(15, 23, 42);
+    ellipse(-8 + eyeShift, -20, 5, 5);
+    ellipse(8 + eyeShift, -20, 5, 5);
+    fill(255);
+    ellipse(-9 + eyeShift, -22, 2, 2);
+    ellipse(7 + eyeShift, -22, 2, 2);
 
     // Beak
-    fill('#FF9800');
-    triangle(-4, -15, 4, -15, 0, -10);
+    fill('#f97316');
+    stroke('#ea580c');
+    strokeWeight(1);
+    beginShape();
+    vertex(0 + eyeShift * 0.8, -13);
+    vertex(4 + eyeShift * 0.8, -16);
+    vertex(0 + eyeShift * 0.8, -18);
+    vertex(-4 + eyeShift * 0.8, -16);
+    endShape(CLOSE);
 
-    // Scarf (blowing in wind)
-    fill('#E91E63'); // Pink scarf
-    rect(-15, -10, 30, 8, 2);
+    // 4. Aviator Pilot Goggles on Forehead
+    fill('#78350f'); // Leather strap
+    stroke('#451a03');
+    strokeWeight(1);
+    rect(-18, -27, 36, 4, 2);
 
-    // Scarf tail blowing opposite to motion
-    if (Math.abs(getPhysicsState().velocity) > 1) {
-        const windDir = -Math.sign(getPhysicsState().velocity);
-        const windSpeed = Math.min(Math.abs(getPhysicsState().velocity) / 2, 20);
+    // Metallic frames (Amber copper)
+    fill('#d67b19');
+    stroke('#92400e');
+    strokeWeight(1.5);
+    ellipse(-8, -27, 12, 10);
+    ellipse(8, -27, 12, 10);
+    strokeWeight(2);
+    line(-2, -27, 2, -27);
 
-        beginShape();
-        vertex(10 * windDir, -8);
-        bezierVertex(
-            20 * windDir, -15 - windSpeed / 2,
-            30 * windDir + (sin(frameCount * 0.2) * 5), -5,
-            35 * windDir + windSpeed, -10 + (cos(frameCount * 0.2) * 5)
-        );
-        vertex(35 * windDir + windSpeed, -2);
-        vertex(10 * windDir, -2);
-        endShape(CLOSE);
-    }
+    // Polarized lenses (Teal reflection)
+    fill('#0f7e9b');
+    noStroke();
+    ellipse(-8, -27, 9, 7);
+    ellipse(8, -27, 9, 7);
+    fill(255, 255, 255, 180);
+    ellipse(-9, -28, 4, 2.5);
+    ellipse(7, -28, 4, 2.5);
+
+    // 5. Scarf Knot on Neck (Amber #d67b19)
+    fill('#d67b19');
+    stroke('#b86510');
+    strokeWeight(1);
+    rect(-14, -8, 28, 8, 3);
+
+    // 6. Flippers holding cockpit controls
+    fill(24, 28, 36);
+    noStroke();
+    ellipse(-16, 6, 8, 16);
+    ellipse(16, 6, 8, 16);
+
+    // Little feet on sled deck
+    fill('#f97316');
+    ellipse(-8, 24, 10, 5);
+    ellipse(8, 24, 10, 5);
 
     pop();
 }
 
+/**
+ * Draw rocket engine with multi-stage plasma flame
+ */
+function drawRocket(x, y, direction, active) {
+    push();
+    translate(x, y);
+
+    // Engine housing
+    fill('#0f7e9b');
+    stroke('#0b5f77');
+    strokeWeight(1);
+    rect(-10 * direction, -8, 20 * direction, 16, 3);
+
+    // Titanium Nozzle
+    fill('#334155');
+    stroke('#1e293b');
+    strokeWeight(1);
+    if (direction > 0) {
+        triangle(10, -8, 10, 8, 18, 0);
+    } else {
+        triangle(-10, -8, -10, 8, -18, 0);
+    }
+
+    // Plasma Flame when active
+    if (active) {
+        const flamePulse = Math.sin(frameCount * 0.8) * 6;
+        const flameLength = 32 + flamePulse;
+
+        // Outer Flame (Amber #d67b19)
+        noStroke();
+        fill('rgba(214, 123, 25, 0.85)');
+        if (direction > 0) {
+            triangle(16, -9, 16, 9, 16 + flameLength, 0);
+        } else {
+            triangle(-16, -9, -16, 9, -16 - flameLength, 0);
+        }
+
+        // Mid Flame (Bright Gold-Amber)
+        fill('rgba(251, 191, 36, 0.95)');
+        if (direction > 0) {
+            triangle(16, -6, 16, 6, 16 + flameLength * 0.7, 0);
+        } else {
+            triangle(-16, -6, -16, 6, -16 - flameLength * 0.7, 0);
+        }
+
+        // Inner Core (White-hot plasma)
+        fill(255, 255, 255);
+        if (direction > 0) {
+            triangle(16, -3, 16, 3, 16 + flameLength * 0.35, 0);
+        } else {
+            triangle(-16, -3, -16, 3, -16 - flameLength * 0.35, 0);
+        }
+    }
+
+    pop();
+}
 
 /**
  * Initialize snow system
  */
 function initSnow() {
-    console.log('Initializing snow with dimensions:', canvasWidth, canvasHeight);
-    if (!canvasWidth || !canvasHeight) {
-        canvasWidth = window.innerWidth;
-        canvasHeight = window.innerHeight;
-    }
+    snowParticles.length = 0;
+    const w = canvasWidth || window.innerWidth;
+    const h = canvasHeight || window.innerHeight;
 
     for (let i = 0; i < SNOW_COUNT; i++) {
         snowParticles.push({
-            x: Math.random() * canvasWidth,
-            y: Math.random() * canvasHeight,
-            size: Math.random() * 3 + 1,
-            speed: Math.random() * 2 + 1,
+            x: Math.random() * w,
+            y: Math.random() * h,
+            size: Math.random() * 2.5 + 1.2,
+            speed: Math.random() * 1.5 + 0.8,
             wobble: Math.random() * TWO_PI
         });
     }
 }
 
 /**
- * Update and draw snow
+ * Update and draw falling snow particles
  */
 function drawSnow(velocity) {
     noStroke();
-    fill(255, 255, 255, 180);
+    fill(255, 255, 255, 210);
 
     for (const p of snowParticles) {
-        // Move snow
         p.y += p.speed;
-        p.x -= velocity * 2; // Move opposite to sled
-        p.wobble += 0.05;
+        p.x -= velocity * 1.6;
+        p.wobble += 0.04;
 
-        const wobbleX = Math.sin(p.wobble) * 2;
-
+        const wobbleX = Math.sin(p.wobble) * 1.5;
         ellipse(p.x + wobbleX, p.y, p.size);
 
-        // Wrap around
         if (p.y > canvasHeight) {
             p.y = -10;
             p.x = Math.random() * canvasWidth;
@@ -567,68 +757,11 @@ function drawSnow(velocity) {
 }
 
 /**
- * Draw a rocket engine with optional flame
- */
-function drawRocket(x, y, direction, active) {
-    push();
-    translate(x, y);
-
-    // Rocket body
-    fill(COLORS.sledAccent);
-    noStroke();
-    rect(-8 * direction, -10, 16 * direction, 20, 3);
-
-    // Nozzle
-    fill(COLORS.wheel);
-    if (direction > 0) {
-        triangle(8, -8, 8, 8, 16, 0);
-    } else {
-        triangle(-8, -8, -8, 8, -16, 0);
-    }
-
-    // Flame when active
-    if (active) {
-        const flameSize = 20 + sin(jetFlameOffset * 10) * 5;
-
-        // Outer glow
-        fill(COLORS.jetGlow + '60');
-        noStroke();
-        if (direction > 0) {
-            ellipse(20 + flameSize / 2, 0, flameSize * 1.5, 18);
-        } else {
-            ellipse(-20 - flameSize / 2, 0, flameSize * 1.5, 18);
-        }
-
-        // Inner flame
-        fill(COLORS.jet);
-        if (direction > 0) {
-            triangle(16, -6, 16, 6, 16 + flameSize, 0);
-        } else {
-            triangle(-16, -6, -16, 6, -16 - flameSize, 0);
-        }
-
-        // Hot core
-        fill('#FFEB3B');
-        if (direction > 0) {
-            triangle(16, -3, 16, 3, 16 + flameSize * 0.6, 0);
-        } else {
-            triangle(-16, -3, -16, 3, -16 - flameSize * 0.6, 0);
-        }
-    }
-
-    pop();
-}
-
-/**
- * Draw force diagram centered on the sled's center of mass
- * Main View: Arrows ONLY (no text) to avoid clutter
+ * Draw force diagram on sled
  */
 function drawForceDiagram(x, y, state) {
-    // Center of mass position (center of the sled body)
     const comX = x;
     const comY = y + SLED_HEIGHT / 2;
-
-    // Scale for main view arrows
     const scale = 0.05;
     const minArrowLength = 40;
 
@@ -654,19 +787,17 @@ function drawForceDiagram(x, y, state) {
     const normalLength = Math.max(state.normalForce * scale * 0.5, minArrowLength);
     drawForceArrow(comX, comY, 0, -normalLength, COLORS.forceNormal, '');
 
-    // Gravity/Weight (downward)
+    // Gravity (downward)
     const gravityLength = Math.max(state.gravityForce * scale * 0.5, minArrowLength);
     drawForceArrow(comX, comY, 0, gravityLength, COLORS.forceGravity, '');
 }
 
 /**
- * Draw a dedicated Free Body Diagram (FBD) overlay
- * This shows the forces in isolation with full labels
+ * Draw Free Body Diagram overlay card
  */
 function drawFreeBodyDiagramOverlay(state) {
-    const boxWidth = 280; // Wider to fit labels
+    const boxWidth = 280;
     const boxHeight = 240;
-    // Bottom-Left positioning (avoids sled)
     const boxX = 20;
     const boxY = canvasHeight - boxHeight - 20;
     const centerX = boxX + boxWidth / 2;
@@ -674,67 +805,48 @@ function drawFreeBodyDiagramOverlay(state) {
 
     push();
 
-    // Background Panel
-    fill(COLORS.bgDark + 'E6'); // 90% opacity hex
-    stroke(COLORS.textSecondary);
-    strokeWeight(2);
+    // Clean white card surface
+    fill('rgba(255, 255, 255, 0.95)');
+    stroke('#c8dbe3');
+    strokeWeight(1.5);
     rect(boxX, boxY, boxWidth, boxHeight, 10);
 
-    // Title removed to save space for labels
-    // noStroke();
-    // fill(COLORS.text);
-    // textSize(16);
-    // textAlign(CENTER, TOP);
-    // textStyle(BOLD);
-    // text("Free Body Diagram", centerX, boxY + 15);
-
-    // Central Object (Point Mass)
-    fill(COLORS.text);
+    // Central Object point
+    fill('#123140');
     noStroke();
     ellipse(centerX, centerY, 10, 10);
 
-    // Scale for FBD (Compact)
     const scale = 0.03;
     const minLen = 25;
-    const maxLen = 80; // Cap length to stay in compact box
+    const maxLen = 80;
 
-    // Helper to clamp length
     const getLen = (force) => {
         let l = Math.abs(force) * scale;
         return Math.min(Math.max(l, minLen), maxLen);
     };
 
-    // --- Applied Force ---
     if (state.appliedForce !== 0) {
         const l = getLen(state.appliedForce);
         const dir = Math.sign(state.appliedForce);
         drawFBDArrow(centerX, centerY, l * dir, 0, COLORS.forceApplied, 'F applied on\nSled by Rockets', dir === 1 ? 'RIGHT' : 'LEFT');
     }
 
-    // --- Friction ---
     if (Math.abs(state.frictionForce) > 0.1) {
         const l = getLen(state.frictionForce);
         const dir = Math.sign(state.frictionForce);
-        // Increased vertical offset to separate from Drag
         drawFBDArrow(centerX, centerY + 10, l * dir, 0, COLORS.forceFriction, 'F friction on\nSled by Track', dir === 1 ? 'RIGHT' : 'LEFT');
     }
 
-    // --- Drag ---
     if (Math.abs(state.airDragForce) > 0.1) {
         const l = getLen(state.airDragForce);
         const dir = Math.sign(state.airDragForce);
         drawFBDArrow(centerX, centerY - 10, l * dir, 0, COLORS.forceAir, 'F air on\nSled by Air', dir === 1 ? 'RIGHT' : 'LEFT');
     }
 
-    // --- Normal ---
     const normLen = getLen(state.normalForce);
-
-    // Check for vertical equilibrium (Normal = Gravity)
     const isVerticallyBalanced = Math.abs(state.normalForce - state.gravityForce) < 1;
-
     drawFBDArrow(centerX, centerY, 0, -normLen, COLORS.forceNormal, 'F normal on\nSled by Track', 'TOP', isVerticallyBalanced);
 
-    // --- Gravity ---
     const gravLen = getLen(state.gravityForce);
     drawFBDArrow(centerX, centerY, 0, gravLen, COLORS.forceGravity, 'F gravity on\nSled by Earth', 'BOTTOM', isVerticallyBalanced);
 
@@ -742,170 +854,131 @@ function drawFreeBodyDiagramOverlay(state) {
 }
 
 /**
- * specialized arrow drawer for the FBD overlay
- * Handles complex label positioning relative to the box bounds
- * Added congruencyMark support for balanced forces
+ * Draw a labeled FBD arrow with equality tick mark if balanced
  */
-function drawFBDArrow(x, y, dx, dy, color, label, posHint, showCongruency = false) {
+function drawFBDArrow(startX, startY, dx, dy, colorHex, labelText, labelPosition, showEqualityTick = false) {
+    const endX = startX + dx;
+    const endY = startY + dy;
+    const arrowHeadSize = 8;
+
     push();
-    stroke(color);
-    strokeWeight(4);
-    fill(color);
+    stroke(colorHex);
+    strokeWeight(2.5);
+    line(startX, startY, endX, endY);
 
-    // Line
-    line(x, y, x + dx, y + dy);
+    const angle = Math.atan2(dy, dx);
+    fill(colorHex);
+    noStroke();
+    push();
+    translate(endX, endY);
+    rotate(angle);
+    triangle(0, 0, -arrowHeadSize, -arrowHeadSize / 2, -arrowHeadSize, arrowHeadSize / 2);
+    pop();
 
-    // Congruency Mark (Tick mark)
-    if (showCongruency) {
-        push();
-        stroke(255); // White mark for high contrast
-        strokeWeight(3);
-        const midX = x + dx * 0.5;
-        const midY = y + dy * 0.5;
+    if (showEqualityTick) {
+        const midX = startX + dx / 2;
+        const midY = startY + dy / 2;
+        stroke(colorHex);
+        strokeWeight(2);
+        line(midX - 5, midY, midX + 5, midY);
+    }
 
-        // Calculate perpendicular direction (tick is 10px long)
-        const tickSize = 10;
-        const len = Math.sqrt(dx * dx + dy * dy);
+    if (labelText) {
+        noStroke();
+        fill('#123140');
+        textSize(10);
+        textStyle(BOLD);
 
-        if (len > 0) {
-            // Perpendicular vector (-dy, dx)
-            const perpX = (-dy / len) * (tickSize / 2);
-            const perpY = (dx / len) * (tickSize / 2);
+        let tx = endX;
+        let ty = endY;
+        const offset = 14;
 
-            line(midX - perpX, midY - perpY, midX + perpX, midY + perpY);
+        switch (labelPosition) {
+            case 'RIGHT':
+                textAlign(LEFT, CENTER);
+                tx += offset;
+                break;
+            case 'LEFT':
+                textAlign(RIGHT, CENTER);
+                tx -= offset;
+                break;
+            case 'TOP':
+                textAlign(CENTER, BOTTOM);
+                ty -= offset;
+                break;
+            case 'BOTTOM':
+                textAlign(CENTER, TOP);
+                ty += offset;
+                break;
         }
-        pop();
+
+        text(labelText, tx, ty);
     }
-
-    // Arrowhead
-    const angle = atan2(dy, dx);
-    const size = 12;
-    push();
-    translate(x + dx, y + dy);
-    rotate(angle);
-    triangle(0, 0, -size, -size / 2, -size, size / 2);
-    pop();
-
-    // Label
-    noStroke();
-    fill(COLORS.text);
-    textSize(10); // Smaller font to fit in box
-    textStyle(NORMAL);
-
-    let lx = x + dx;
-    let ly = y + dy;
-
-    // Positioning logic based on hint
-    if (posHint === 'RIGHT') {
-        textAlign(LEFT, CENTER);
-        lx += 10; // Reduced offset
-    } else if (posHint === 'LEFT') {
-        textAlign(RIGHT, CENTER);
-        lx -= 10; // Reduced offset
-    } else if (posHint === 'TOP') {
-        textAlign(CENTER, BOTTOM);
-        ly -= 10; // Reduced offset
-    } else if (posHint === 'BOTTOM') {
-        textAlign(CENTER, TOP);
-        ly += 10; // Reduced offset
-    }
-
-    text(label, lx, ly);
-    pop();
-}
-
-/**
- * Draw a force arrow (Main View - No Label Version)
- */
-function drawForceArrow(x, y, dx, dy, color, label) {
-    push();
-
-    // Draw black outline for visibility
-    stroke(0);
-    strokeWeight(10);
-    line(x, y, x + dx, y + dy);
-
-    // Arrow line
-    stroke(color);
-    strokeWeight(6);
-    fill(color);
-    line(x, y, x + dx, y + dy);
-
-    // Arrowhead
-    const angle = atan2(dy, dx);
-    const arrowSize = 25;
-
-    push();
-    translate(x + dx, y + dy);
-    rotate(angle);
-    noStroke();
-    fill(color);
-    triangle(0, 0, -arrowSize, -arrowSize / 2, -arrowSize, arrowSize / 2);
-    pop();
-
-    // NO LABEL DRAWING HERE ANYMORE
 
     pop();
 }
 
 /**
- * Draw velocity indicator arrow
- * Rendered as a "Double Arrow" (two parallel shafts) for emphasis
+ * Draw individual vector arrow
  */
-function drawVelocityArrow(x, y, velocity) {
+function drawForceArrow(startX, startY, dx, dy, colorHex, labelText) {
+    const endX = startX + dx;
+    const endY = startY + dy;
+    const arrowHeadSize = 10;
+
+    push();
+    stroke(colorHex);
+    strokeWeight(3.5);
+    line(startX, startY, endX, endY);
+
+    const angle = Math.atan2(dy, dx);
+    fill(colorHex);
+    noStroke();
+    push();
+    translate(endX, endY);
+    rotate(angle);
+    triangle(0, 0, -arrowHeadSize, -arrowHeadSize / 2, -arrowHeadSize, arrowHeadSize / 2);
+    pop();
+
+    pop();
+}
+
+/**
+ * Draw velocity vector arrow with label
+ */
+function drawVelocityArrow(x, arrowY, velocity) {
     if (Math.abs(velocity) < 0.1) return;
 
     push();
+    const maxLength = 100;
+    const length = constrain(velocity * 2.5, -maxLength, maxLength);
 
-    // Move higher up to avoid overlapping with Normal force
-    // x is sledScreenX, y passed is (sledScreenY - SLED_HEIGHT - 30)
-    // We want it significantly higher, say 80px higher than that
-    const arrowY = y - 80;
-
-    const maxLength = 120; // Larger max length
-    const pxPerMs = 2.4; // Scaling factor
-    const rawLength = velocity * pxPerMs;
-    // Cap length but keep direction
-    const length = (Math.abs(rawLength) > maxLength) ? (Math.sign(velocity) * maxLength) : rawLength;
-
-    stroke(COLORS.primary);
-    noFill();
-
-    // "Double Arrow" Style -> Two parallel lines for shaft
-    const shaftSeparation = 6;
+    stroke('#0f7e9b');
     strokeWeight(3);
+    line(x, arrowY, x + length, arrowY);
 
-    // Top shaft
-    line(x, arrowY - shaftSeparation / 2, x + length, arrowY - shaftSeparation / 2);
-    // Bottom shaft
-    line(x, arrowY + shaftSeparation / 2, x + length, arrowY + shaftSeparation / 2);
-
-    // Arrowhead
-    fill(COLORS.primary);
     noStroke();
-    const arrowSize = 16;
+    fill('#0f7e9b');
+    const arrowSize = 12;
     if (velocity > 0) {
         triangle(
-            x + length + 5, arrowY,
-            x + length - 5, arrowY - arrowSize,
-            x + length - 5, arrowY + arrowSize
+            x + length + 4, arrowY,
+            x + length - 4, arrowY - arrowSize / 2,
+            x + length - 4, arrowY + arrowSize / 2
         );
     } else {
         triangle(
-            x + length - 5, arrowY,
-            x + length + 5, arrowY - arrowSize,
-            x + length + 5, arrowY + arrowSize
+            x + length - 4, arrowY,
+            x + length + 4, arrowY - arrowSize / 2,
+            x + length + 4, arrowY + arrowSize / 2
         );
     }
 
-    // Label
-    fill(COLORS.primary);
-    stroke(0);
-    strokeWeight(2); // Text outline
-    textSize(16); // Larger font
+    fill('#0f7e9b');
+    textSize(14);
     textStyle(BOLD);
     textAlign(CENTER);
-    text(`v = ${velocity.toFixed(1)} m/s`, x, arrowY - 25);
+    text(`v = ${velocity.toFixed(1)} m/s`, x, arrowY - 14);
 
     pop();
 }
@@ -925,7 +998,7 @@ function toggleGrid(show) {
 }
 
 /**
- * Handle mouse clicks on canvas (e.g., clicking on the sled pilot)
+ * Handle mouse clicks on canvas (pilot click interaction)
  */
 function mouseClicked() {
     if (mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) return;
@@ -934,7 +1007,6 @@ function mouseClicked() {
     const trackY = canvasHeight * TRACK_Y_RATIO;
     const sledY = trackY - SLED_HEIGHT / 2 - 4;
 
-    // Check if clicked near the pilot on top of the sled
     const d = dist(mouseX, mouseY, centerX, sledY - 15);
     if (d < 45) {
         if (typeof window.toggleCocoPilot === 'function' && typeof window.isPugUnlockedEver === 'function' && window.isPugUnlockedEver()) {

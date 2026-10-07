@@ -750,7 +750,7 @@ function showPugModeUnlocked() {
             🎉 Coco Mode Unlocked! 🎉
         </p>
         <p style="font-size: 1rem; line-height: 1.55; margin: 0 0 24px 0; color: #4b6570;">
-            Meet <strong>Coco</strong>, Mr. Lopez's pug! Coco has taken the pilot seat and is now riding the rocket sled!
+            Meet <strong>Coco</strong>, Mr. Lopez's dog! Coco has taken the pilot seat and is now riding the rocket sled!
         </p>
         <button id="closePugModal" style="
             background: #d67b19;
