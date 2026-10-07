@@ -217,17 +217,7 @@ function setupEventListeners() {
         });
     });
 
-    // Pilot Menu Button
-    const pilotBtn = document.getElementById('pilotMenuBtn') || document.getElementById('cocoToggleBtn');
-    pilotBtn?.addEventListener('click', (e) => {
-        // If clicking directly on a single button (not dropdown arrow), cycle or toggle menu
-        const dropdown = document.getElementById('pilotDropdown');
-        if (dropdown) {
-            dropdown.classList.toggle('show');
-        } else {
-            cyclePilot();
-        }
-    });
+    // Pilot Menu is initialized in setupPilotMenu()
 }
 
 /**
